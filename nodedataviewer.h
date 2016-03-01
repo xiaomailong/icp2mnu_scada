@@ -3,6 +3,9 @@
 
 #include <QDialog>
 #include <QTimer>
+#include <QString>
+#include <QHash>
+
 #include "nodes.h"
 
 namespace Ui {
@@ -14,11 +17,12 @@ class NodeDataViewer : public QDialog
     Q_OBJECT
 
 public:
-    explicit NodeDataViewer(CommonNode *node, QWidget *parent = 0);
+    explicit NodeDataViewer(CommonNode *node, QVector<CommonTrend *> *vectTrends, QWidget *parent = 0);
     ~NodeDataViewer();
     QTimer m_timer1s;
     CommonNode *m_node;
     void closeEvent(QCloseEvent *event);
+    QHash<int, QString> hashTagNames;
 
 public slots:
     void Timer1sEvent();

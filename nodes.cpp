@@ -2,7 +2,7 @@
 #include "logger.h"
 
 extern const char *trend_path;
-extern const float min_float=-3.4028234663852886e+38;        //минимальное число float
+extern const float min_float=-3.4028234663852886e+38;
 extern float empty_file[17280];
 
 extern QVector<CommonTrend *> vectCommonTrends;

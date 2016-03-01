@@ -848,7 +848,7 @@ void MainWindow::ViewNodeData(QListWidgetItem *item)
 
     if (hashCommonNodes.contains(objName))
     {
-        NodeDataViewer *ndw=new NodeDataViewer(hashCommonNodes[objName] ,this);
+        NodeDataViewer *ndw=new NodeDataViewer(hashCommonNodes[objName], &vectCommonTrends ,this);
         ndw->show();
     }
 }
