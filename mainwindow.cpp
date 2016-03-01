@@ -10,12 +10,14 @@
 #include <QCryptographicHash>
 #include <QRegExp>
 #include <QtScript/QScriptEngine>
+#include <QModelIndex>
 
 #include "nodes.h"
 #include "logger.h"
 #include "alarm.h"
 #include "odbcdb.h"
 #include "configreader.h"
+#include "nodedataviewer.h"
 
 
 
@@ -112,6 +114,7 @@ MainWindow::MainWindow(QWidget *parent) :
     logger->AddLog("Старт системы",Qt::black);
 
     connect(ui->buttonMessagesShow,SIGNAL(clicked()),SLOT(buttonMessagesShow_clicked()));
+    connect(ui->listWidget,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(ViewNodeData(QListWidgetItem*)));
 
 
     alarms=new Alarms();
@@ -802,9 +805,57 @@ int itime,iprevtime=100;
 //=========================================================================================
 void MainWindow::pushTestButton()
 {
-    QScriptEngine engine;
-    float res=engine.evaluate("Math.abs(-1e+2+45.222)").toNumber();
-    ui->testButton->setText(QString::number(res));
+    static int first_call=true;
 
+    static QScriptEngine engine;
+    if (first_call)
+    {
+        QString fileName = qApp->applicationDirPath()+"\\mnu_scada.js";
+        QFile scriptFile(fileName);
+        scriptFile.open(QIODevice::ReadOnly);
+        QTextStream stream(&scriptFile);
+        QString contents = stream.readAll();
+        scriptFile.close();
+
+        engine.evaluate(contents, fileName);
+
+        //QString my_fun="function my_fun( x ) { return x*x; } function my_fun2(x) {return x*x*x }";
+        //engine.evaluate(my_fun);
+    }
+    else
+    {
+        float res=engine.evaluate("my_fun2(5)+my_fun(2)").toNumber();
+        ui->testButton->setText(QString::number(res));
+    }
+    first_call=false;
+
+
+}
+
+//=========================================================================================
+void MainWindow::ViewNodeData(QListWidgetItem *item)
+{
+/*
+    foreach(CommonNode *node,hashCommonNodes)
+    {
+        if (node->m_this_number==ui->listWidget->
+        {
+            NodeDataViewer *ndw=new NodeDataViewer(node ,this);
+            ndw->show();
+            break;
+        }
+    }
+*/
+
+    QString objName=item->text();
+        qDebug() << objName;
+    objName=objName.left(objName.indexOf(' '));
+        qDebug() << objName;
+
+    if (hashCommonNodes.contains(objName))
+    {
+        NodeDataViewer *ndw=new NodeDataViewer(hashCommonNodes[objName] ,this);
+        ndw->show();
+    }
 }
 //=========================================================================================

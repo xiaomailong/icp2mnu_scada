@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     tag.cpp \
     logger.cpp \
     odbcdb.cpp \
-    configreader.cpp
+    configreader.cpp \
+    nodedataviewer.cpp
 
 HEADERS  += mainwindow.h \
     autostopthread.h \
@@ -34,10 +35,12 @@ HEADERS  += mainwindow.h \
     tag.h \
     logger.h \
     odbcdb.h \
-    configreader.h
+    configreader.h \
+    nodedataviewer.h
 
 FORMS    += mainwindow.ui \
-    logger.ui
+    logger.ui \
+    nodedataviewer.ui
 
 LIBS += -lws2_32
 
