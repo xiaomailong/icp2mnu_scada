@@ -10,7 +10,6 @@
 #include <QCryptographicHash>
 #include <QRegExp>
 #include <QtScript/QScriptEngine>
-#include <QModelIndex>
 
 #include "nodes.h"
 #include "logger.h"
@@ -21,24 +20,19 @@
 
 
 
-
+//==================================================================================================
+//Global vars
+//TO DO: переделать на синглтоны или создать объект типа ScadaServer - статический или синглтон
+//==================================================================================================
 const char *trend_path="d:\\MNU_SCADA\\trends\\";   //каталог для трендовых файлов
 const float min_float=-3.4028234663852886e+38;        //минимальное число float
 float empty_file[17280];
-
-//================================================================================================
-
 
 QHash<QString, CommonNode *> hashCommonNodes;
 QVector<CommonTrend *> vectCommonTrends;
 QVector<alarm_tag_struct> vectAlarmTags;
 
-
-
-//================================================================================================
-
 //Подсистемы СКАДы
-
 Logger *logger;
 Alarms *alarms;
 OdbcDb *alarmDB;
@@ -848,9 +842,9 @@ void MainWindow::ViewNodeData(QListWidgetItem *item)
 */
 
     QString objName=item->text();
-        qDebug() << objName;
+    //    qDebug() << objName;
     objName=objName.left(objName.indexOf(' '));
-        qDebug() << objName;
+    //    qDebug() << objName;
 
     if (hashCommonNodes.contains(objName))
     {
