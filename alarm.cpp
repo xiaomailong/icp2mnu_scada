@@ -398,7 +398,7 @@ void Alarms::AddAlarm(AlarmLevel alarmlevel,AlarmType alarmType,FloatTag *tag,Al
     next_alarm_ID++;
     Alarm *newAlarm=new Alarm(next_alarm_ID, alarmlevel,alarmType,tag,alarmcondition, alarmvalue,alarmtext,alarmdelaySec);
     allAlarmsList.push_back(newAlarm);
-    logger->AddLog("АЛАРМ: Добавлен: "+alarmtext+",delay="+QString::number(alarmdelaySec),Qt::darkCyan);
+    logger->AddLog("АЛАРМ: Добавлен: "+alarmtext+", value="+QString::number(alarmvalue)+" ,delay="+QString::number(alarmdelaySec),Qt::darkCyan);
 
 }
 //=================================================================

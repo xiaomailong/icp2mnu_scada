@@ -85,7 +85,7 @@ bool ConfigReader::ReadNextNode(QString &objectName,QString &objectType,QString 
         QString node_conf_line=configFile.readLine();
         //logger->AddLog("Node File: "+node_conf_line,Qt::black);
 
-        QRegExp patternEmptyStr("^\s*\n*$");
+        QRegExp patternEmptyStr("^\\s*\\n*$");
 
         if (node_conf_line[0]=='#' || patternEmptyStr.indexIn(node_conf_line)!=-1) continue;   //комментарии или пустые строки
 
@@ -138,7 +138,7 @@ bool ConfigReader::ReadNextTrend(QString &objectName, QString &trendName,uint &n
         QString node_conf_line=configFile.readLine();
         //logger->AddLog("Node File: "+node_conf_line,Qt::black);
 
-        QRegExp patternEmptyStr("^\s*\n*$");
+        QRegExp patternEmptyStr("^\\s*\\n*$");
 
         if (node_conf_line[0]=='#' || patternEmptyStr.indexIn(node_conf_line)!=-1) continue;   //комментарии или пустые строки
 
@@ -194,13 +194,13 @@ bool ConfigReader::ReadNextAlarm(QString &alarmType, QString &alarmExpression, Q
         QString node_conf_line=configFile.readLine();
         //logger->AddLog("Node File: "+node_conf_line,Qt::black);
 
-        QRegExp patternEmptyStr("^\s*\n*$");
+        QRegExp patternEmptyStr("^\\s*\\n*$");
 
         if (node_conf_line[0]=='#' || patternEmptyStr.indexIn(node_conf_line)!=-1) continue;   //комментарии или пустые строки
 
         if (node_conf_line[0]=='[') return false;   //достигнута следующая секция
 
-        QRegExp regExp("^(information|warning|critical|connect)\\s+([\\w\\d\\[\\]+-\\/*\\(\\)]+)([<>=]?)([+-]?\\d*\\.?\\d*)\\s+(\\d*)\\s+(.+[^\\n])\\n*$");
+        QRegExp regExp("^(information|warning|critical|connect)\\s+([\\w\\d\\[\\]+-\\/*\\(\\)]+)([<>=]?)([+-]?\\d*\\.?\\d*)\\s+(\\d*)\\s+(\\S.+[^\\n])\\n*$");
         if(regExp.indexIn(node_conf_line)!=-1)  //неподходящие строки игнорируем
         {
             alarmType=regExp.cap(1);
@@ -286,7 +286,7 @@ bool ConfigReader::ReadNextVirtualTag(QString &objectName,uint &numInBuff,QStrin
         QString node_conf_line=configFile.readLine();
         //logger->AddLog("Node File: "+node_conf_line,Qt::black);
 
-        QRegExp patternEmptyStr("^\s*\n*$");
+        QRegExp patternEmptyStr("^\\s*\\n*$");
 
         if (node_conf_line[0]=='#' || patternEmptyStr.indexIn(node_conf_line)!=-1) continue;   //комментарии или пустые строки
 
