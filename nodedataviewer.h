@@ -23,6 +23,7 @@ public:
     CommonNode *m_node;
     void closeEvent(QCloseEvent *event);
     QHash<int, QString> hashTagNames;
+    QString FormattedTagString(QString objName, uint numInBuff, float tagValue, QString tagName);
 
 public slots:
     void Timer1sEvent();

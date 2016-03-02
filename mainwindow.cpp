@@ -11,7 +11,7 @@
 #include <QRegExp>
 #include <QtScript/QScriptEngine>
 
-#include "nodes.h"
+
 #include "logger.h"
 #include "alarm.h"
 #include "odbcdb.h"
@@ -93,6 +93,7 @@ QString file_hash_result;
     return false;
 }
 //============================================================================================
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -149,37 +150,8 @@ MainWindow::MainWindow(QWidget *parent) :
                                                        port_repl,port_local,
                                                        modbus_start_address, num_float_tags);
 
-             //char tabs[8];
-             //if (node->m_nameObject.length()<9) sprintf(tabs,"\t\t");
-             //else sprintf(tabs,"\t");
 
-
-             char node_text[256];
-             for (uint i=0;i<255;++i) node_text[i]=' ';
-             node_text[255]=0;
-
-            strcpy(&node_text[0],  node->m_nameObject.toStdString().c_str());
-            node_text[strlen(node_text)]=' '; //уберем добавленный конец строки
-            strcpy(&node_text[20], (node->m_IP_addr+":" + QString::number(node->m_port)).toStdString().c_str());
-            node_text[strlen(node_text)]=' ';
-            strcpy(&node_text[38], (QString("(") + node->m_typeObject).toStdString().c_str());
-            node_text[strlen(node_text)]=' ';
-            strcpy(&node_text[48], (QString(",tags=") + QString::number(node->m_srv.num_float_tags)+")").toStdString().c_str());
-            node_text[strlen(node_text)]=' ';
-            strcpy(&node_text[58], QString("connecting...").toStdString().c_str());
-            node_text[strlen(node_text)]=' ';
-            strcpy(&node_text[75], (QString(" ---> 127.0.0.1:")+ QString::number(node->m_port_local) + "(MADBUS)  === ").toStdString().c_str());
-            node_text[strlen(node_text)]=' ';
-            strcpy(&node_text[110], QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz").toStdString().c_str());
-
-             ui->listWidget->addItem(node_text);
-
-
-             //ui->listWidget->addItem(node->m_nameObject+":" + tabs + node->m_IP_addr+":" + QString::number(node->m_port)+
-             //                         "(" + node->m_typeObject + ", tags=" + QString::number(node->m_srv.num_float_tags) + ")\t" +
-             //                         "connecting..." + " ---> 127.0.0.1:" +
-             //                         QString::number(node->m_port_local) + "(MADBUS) === " +
-             //                         "   " + QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+             ui->listWidget->addItem(node->FormattedNodeString());
 
              hashCommonNodes.insert(node->m_nameObject,node);
 
@@ -601,41 +573,11 @@ MainWindow::~MainWindow()
 void MainWindow::TextChanged(int iUzel, QString objectName, QString newText)
 {
 
-//char tabs[8];
+    hashCommonNodes[objectName]->m_text_client=newText;
 
-hashCommonNodes[objectName]->m_text_client=newText;
+    ui->listWidget->item(iUzel)->setText(hashCommonNodes[objectName]->FormattedNodeString());
 
-char node_text[256];
-for (uint i=0;i<255;++i) node_text[i]=' ';
-node_text[255]=0;
-
-strcpy(&node_text[0],  objectName.toStdString().c_str());
-node_text[strlen(node_text)]=' '; //уберем добавленный конец строки
-strcpy(&node_text[20], (hashCommonNodes[objectName]->m_IP_addr+":" + QString::number(hashCommonNodes[objectName]->m_port)).toStdString().c_str());
-node_text[strlen(node_text)]=' ';
-strcpy(&node_text[38], (QString("(") + hashCommonNodes[objectName]->m_typeObject).toStdString().c_str());
-node_text[strlen(node_text)]=' ';
-strcpy(&node_text[48], (QString(",tags=") + QString::number(hashCommonNodes[objectName]->m_srv.num_float_tags)+")").toStdString().c_str());
-node_text[strlen(node_text)]=' ';
-strcpy(&node_text[58], (hashCommonNodes[objectName]->m_text_client+ " " + hashCommonNodes[objectName]->m_text_repl).toStdString().c_str());
-node_text[strlen(node_text)]=' ';
-strcpy(&node_text[75], (QString(" ---> 127.0.0.1:")+ QString::number(hashCommonNodes[objectName]->m_port_local) + "(MADBUS)  === ").toStdString().c_str());
-node_text[strlen(node_text)]=' ';
-strcpy(&node_text[110], QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz").toStdString().c_str());
-
-//if (objectName.length()<9) sprintf(tabs,"\t\t");
-//else sprintf(tabs,"\t");
-
-
-// ui->listWidget->item(iUzel)->setText( objectName+":" + tabs + hashCommonNodes[objectName]->m_IP_addr+":" + QString::number(hashCommonNodes[objectName]->m_port)+
-//                                       "(" + hashCommonNodes[objectName]->m_typeObject + ", tags=" + QString::number(hashCommonNodes[objectName]->m_srv.num_float_tags) + ")\t" +
-//                                       hashCommonNodes[objectName]->m_text_client+ " " + hashCommonNodes[objectName]->m_text_repl + " ---> 127.0.0.1:" +
-//                                       QString::number(hashCommonNodes[objectName]->m_port_local) + "(MADBUS) === " +
-//                                       "   " + QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-
-ui->listWidget->item(iUzel)->setText(node_text);
-
- logger->AddLog("Network: " + hashCommonNodes[objectName]->m_nameObject+":" + hashCommonNodes[objectName]->m_IP_addr+":" +
+    logger->AddLog("Network: " + hashCommonNodes[objectName]->m_nameObject+":" + hashCommonNodes[objectName]->m_IP_addr+":" +
                 QString::number(hashCommonNodes[objectName]->m_port)+
                 "(" + hashCommonNodes[objectName]->m_typeObject  + ") === " + hashCommonNodes[objectName]->m_text_client,Qt::darkGreen);
 
@@ -645,34 +587,8 @@ void MainWindow::TextChanged_repl(int iUzel, QString objectName, QString newText
 {
 
     hashCommonNodes[objectName]->m_text_repl=newText;
+    ui->listWidget->item(iUzel)->setText(hashCommonNodes[objectName]->FormattedNodeString());
 
-    char node_text[256];
-    for (uint i=0;i<255;++i) node_text[i]=' ';
-    node_text[255]=0;
-
-    strcpy(&node_text[0],  objectName.toStdString().c_str());
-    node_text[strlen(node_text)]=' '; //уберем добавленный конец строки
-    strcpy(&node_text[20], (hashCommonNodes[objectName]->m_IP_addr+":" + QString::number(hashCommonNodes[objectName]->m_port)).toStdString().c_str());
-    node_text[strlen(node_text)]=' ';
-    strcpy(&node_text[38], (QString("(") + hashCommonNodes[objectName]->m_typeObject).toStdString().c_str());
-    node_text[strlen(node_text)]=' ';
-    strcpy(&node_text[48], (QString(",tags=") + QString::number(hashCommonNodes[objectName]->m_srv.num_float_tags)+")").toStdString().c_str());
-    node_text[strlen(node_text)]=' ';
-    strcpy(&node_text[58], (hashCommonNodes[objectName]->m_text_client+ " " + hashCommonNodes[objectName]->m_text_repl).toStdString().c_str());
-    node_text[strlen(node_text)]=' ';
-    strcpy(&node_text[75], (QString(" ---> 127.0.0.1:")+ QString::number(hashCommonNodes[objectName]->m_port_local) + "(MADBUS)  === ").toStdString().c_str());
-    node_text[strlen(node_text)]=' ';
-    strcpy(&node_text[110], QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz").toStdString().c_str());
-
-
-
-    ui->listWidget->item(iUzel)->setText(node_text);
-
- //ui->listWidget->item(iUzel)->setText( objectName+":" + tabs + hashCommonNodes[objectName]->m_IP_addr+":" + QString::number(hashCommonNodes[objectName]->m_port)+
- //                                      "(" + hashCommonNodes[objectName]->m_typeObject + ", tags=" + QString::number(hashCommonNodes[objectName]->m_srv.num_float_tags) + ")\t" +
- //                                      hashCommonNodes[objectName]->m_text_client+ " " + hashCommonNodes[objectName]->m_text_repl + " ---> 127.0.0.1:" +
- //                                      QString::number(hashCommonNodes[objectName]->m_port_local) + "(MADBUS) === " +
-  //                                     "   " + QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
 }
 //========================================================================================
 

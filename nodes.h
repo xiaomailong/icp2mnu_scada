@@ -53,6 +53,7 @@ class CommonNode: public AutoStopThread
     Q_OBJECT
 public:
 
+    CommonNode();
     virtual ~CommonNode() {}
 
     static CommonNode* CreateNode(MainWindow *mw ,QString objectName,QString objectType,
@@ -84,7 +85,7 @@ public:
     SrvReTranslater m_srv;
     unsigned int m_port_local;
 
-
+    QString FormattedNodeString();
 
 signals:
     void textchange(int iUzel,QString objectName, QString newText);

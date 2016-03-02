@@ -17,6 +17,15 @@ bool operator<(const virt_expr_member_struct &a, const virt_expr_member_struct &
     return a.objectName.length() > b.objectName.length();
 }
 //================================================================================
+CommonNode::CommonNode()
+{
+    memset(m_srv.buff,0.0,100);
+    m_text_client="connecting...";
+    m_text_repl="";
+    m_isConnected=false;
+    m_isReaded=false;
+}
+//================================================================================
 CommonNode* CommonNode::CreateNode(MainWindow *mw ,QString objectName,QString objectType,
                                   QString IP_addr, uint port,
                                   uint port_repl,uint port_local,
@@ -62,7 +71,31 @@ CommonNode *node=NULL;
     nodes_counter++;
     return node;
 }
+//================================================================================
+QString CommonNode::FormattedNodeString()
+{
 
+    char node_text[256];
+    for (uint i=0;i<255;++i) node_text[i]=' ';
+    node_text[255]=0;
+
+    strcpy(&node_text[0],  m_nameObject.toStdString().c_str());
+    node_text[strlen(node_text)]=' '; //уберем добавленный конец строки
+    strcpy(&node_text[20], (m_IP_addr+":" + QString::number(m_port)).toStdString().c_str());
+    node_text[strlen(node_text)]=' ';
+    strcpy(&node_text[39], (QString("(") + m_typeObject).toStdString().c_str());
+    node_text[strlen(node_text)]=' ';
+    strcpy(&node_text[49], (QString(",tags=") + QString::number(m_srv.num_float_tags)+")").toStdString().c_str());
+    node_text[strlen(node_text)]=' ';
+    strcpy(&node_text[59], (m_text_client+ " " + m_text_repl).toStdString().c_str());
+    node_text[strlen(node_text)]=' ';
+    strcpy(&node_text[76], (QString(" ---> 127.0.0.1:")+ QString::number(m_port_local) + "(MADBUS)  === ").toStdString().c_str());
+    node_text[strlen(node_text)]=' ';
+    strcpy(&node_text[111], QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz").toStdString().c_str());
+
+   return QString(node_text);
+
+}
 //================================================================================
 ModbusNode::ModbusNode(int this_number,QString objectName,QString objectType,
                           QString IP_addr, uint port,
@@ -80,8 +113,6 @@ ModbusNode::ModbusNode(int this_number,QString objectName,QString objectType,
     m_port_local=port_local;
     m_modbus_start_address=modbus_start_address;
     m_srv.num_float_tags=num_float_tags;
-    m_isConnected=false;
-    m_isReaded=false;
 
     start();
 }
@@ -191,8 +222,6 @@ MnuScadaNode::MnuScadaNode(int this_number, QString objectName, QString objectTy
     m_port_local=port_local;
     m_modbus_start_address=modbus_start_address;
     m_srv.num_float_tags=num_float_tags;
-    m_isConnected=false;
-    m_isReaded=false;
     m_num_reads=0;
     m_sec_counter=1;
 
@@ -677,8 +706,6 @@ VirtualNode::VirtualNode(int this_number,QString objectName,QString objectType,
     m_port_local=port_local;
     m_modbus_start_address=modbus_start_address;
     m_srv.num_float_tags=num_float_tags;
-    m_isConnected=false;
-    m_isReaded=false;
 
    // emit textchange(this->m_this_number,this->m_nameObject,  "running");
    // start();

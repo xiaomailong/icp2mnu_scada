@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QListWidgetItem>
+//#include "nodes.h"
 #include "alarm.h"
 #include "autostopthread.h"
 
@@ -51,6 +52,7 @@ public slots:
     void alarmsChanged(QList<Alarm *> *pEnabledAlarmList, bool onlyColorChange);
     void pushTestButton();
     void ViewNodeData(QListWidgetItem* item);
+    //QString FormattedNodeString(CommonNode *node);
 signals:
     void textSave2LogFile(int iUzel, QString objectName, QString newText);
 };
