@@ -1,12 +1,12 @@
 #ifndef NODES_H
 #define NODES_H
 
+
 #include <QTimer>
 #include <QTime>
 #include <QFile>
 #include <QtScript/QScriptEngine>
 
-#include "mainwindow.h"
 #include "autostopthread.h"
 #include "srvretranslater.h"
 #include "logger.h"
@@ -57,9 +57,9 @@ public:
     CommonNode();
     virtual ~CommonNode();
 
-    static CommonNode* CreateNode(MainWindow *mw ,QString objectName,QString objectType,
+    static CommonNode* CreateNode(QString objectName, QString objectType,
                                   QString IP_addr, uint port,
-                                  uint port_repl,uint port_local,
+                                  uint port_repl, uint port_local,
                                   uint modbus_start_address,
                                   uint num_float_tags);
 

@@ -1,7 +1,7 @@
 #include "alarm.h"
 
-extern Alarms *alarms;
-extern OdbcDb *alarmDB;
+
+
 //=================================================================
 bool operator<(const alarm_expr_member_struct &a, const alarm_expr_member_struct &b)
 {
@@ -101,7 +101,7 @@ void Alarm::SetDateTimeOfAlarmConfirming()
     dt_confirmed=QDateTime::currentDateTime();
 }
 //=================================================================
-Alarm::Alarm(int id, AlarmLevel alarmlevel, AlarmType alarmtype, FloatTag *tag, AlarmCondition alarmcondition,
+Alarm::Alarm(Alarms *alarms, int id, AlarmLevel alarmlevel, AlarmType alarmtype, FloatTag *tag, AlarmCondition alarmcondition,
              float alarmvalue, QString alarmtext, uint alarmdelaySec)
 {
     ID=id;
@@ -135,7 +135,8 @@ Alarm::Alarm(int id, AlarmLevel alarmlevel, AlarmType alarmtype, FloatTag *tag, 
     }
 
     if (alarmtype==OnValueChanged)
-    connect(tag,SIGNAL(ValueChanged(float)),this,SLOT(TagValueChanged(float)));
+        connect(tag,SIGNAL(ValueChanged(float)),this,SLOT(TagValueChanged(float)));
+
     if (alarmtype==OnQualityChanged)
         connect(tag,SIGNAL(QualityChanged(bool)),this,SLOT(TagQualityChanged(bool)));
 
@@ -279,6 +280,10 @@ Alarms::Alarms()
 next_alarm_ID=0;
 logger=Logger::Instance();
 enabledAlarmList.clear();
+
+alarmDB=new OdbcDb("fire_alarmdb","SYSDBA","784523");
+alarmDB->AddAlarm2DB("Alarms Server Started...");
+
 logger->AddLog("АЛАРМ: Старт подсистемы...",Qt::darkCyan);
 
 //tcp server
@@ -291,6 +296,8 @@ connect(m_pAlarmServerSocket, SIGNAL(newConnection()), this, SLOT(NewConnection(
 //=================================================================
 Alarms::~Alarms()
 {
+   alarmDB->AddAlarm2DB("Alarms Server Closed...");
+   delete alarmDB;
    delete m_pAlarmServerSocket;
 }
 //=================================================================
@@ -346,7 +353,7 @@ void Alarms::ClientWrite()
 
                 qSort(enabledAlarmList.begin(),enabledAlarmList.end(),compare_alarms);
                 emit EnabledAlarmsChanged(&enabledAlarmList, false);
-                alarms->UpdateAllAlarmsToAllClients();
+                UpdateAllAlarmsToAllClients();
                 break; //по ходу он должен быть первым (не всегда, задержки сети могут помешать)
             }
         }
@@ -391,7 +398,7 @@ void Alarms::AddAlarm(AlarmLevel alarmlevel,AlarmType alarmType,FloatTag *tag,Al
               float alarmvalue,QString alarmtext, uint alarmdelaySec)
 {
     next_alarm_ID++;
-    Alarm *newAlarm=new Alarm(next_alarm_ID, alarmlevel,alarmType,tag,alarmcondition, alarmvalue,alarmtext,alarmdelaySec);
+    Alarm *newAlarm=new Alarm(this, next_alarm_ID, alarmlevel,alarmType,tag,alarmcondition, alarmvalue,alarmtext,alarmdelaySec);
     allAlarmsList.push_back(newAlarm);
     logger->AddLog("АЛАРМ: Добавлен: "+alarmtext+", value="+QString::number(alarmvalue)+" ,delay="+QString::number(alarmdelaySec),Qt::darkCyan);
 

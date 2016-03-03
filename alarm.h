@@ -14,6 +14,7 @@
 #include "logger.h"
 #include "odbcdb.h"
 
+class Alarms;
 
 const uint ALARM_MESSAGE_TEXT=128;
 
@@ -113,7 +114,7 @@ public:
     QDateTime dt_confirmed;
     QDateTime dt_deactivated;
     //Alarm();
-    Alarm(int id, AlarmLevel alarmlevel,AlarmType alarmtype,FloatTag *tag,
+    explicit Alarm(Alarms *alarms, int id, AlarmLevel alarmlevel,AlarmType alarmtype,FloatTag *tag,
                  AlarmCondition alarmcondition,float alarmvalue,QString alarmtext, uint alarmdelaySec=0);
     void SetDateTimeOfAlarmActivating();
     void SetDateTimeOfAlarmDeactivating();
@@ -162,6 +163,7 @@ public:
                   float alarmvalue,QString alarmtext, uint alarmdelaySec=0);
     void run();
     Logger *logger;
+    OdbcDb *alarmDB;
 signals:
     void EnabledAlarmsChanged(QList < Alarm* > *pEnabledAlarmList, bool onlyColorChange);
 

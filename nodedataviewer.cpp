@@ -1,8 +1,6 @@
 #include "nodedataviewer.h"
 #include "ui_nodedataviewer.h"
 
-
-//=====================================================
 //=====================================================
 NodeDataViewer::NodeDataViewer(CommonNode *node, QVector<CommonTrend *> *vectTrends, QWidget *parent) :
     QDialog(parent),
@@ -40,10 +38,12 @@ NodeDataViewer::~NodeDataViewer()
 //=====================================================
 QString NodeDataViewer::FormattedTagString(QString objName, uint numInBuff, float tagValue, QString tagName)
 {
+
     char tag_text[64];
     for (uint i=0;i<64;++i) tag_text[i]=' ';
-    tag_text[64]=0;
+    tag_text[63]=0;
 
+    //Небезопасно - по хорошему переделать на strncpy, а лучше на strlcpy, но его нет в mingw
 
     strcpy(&tag_text[0],  (objName+"["+QString::number(numInBuff)+"] = ").toStdString().c_str());
     tag_text[strlen(tag_text)]=' '; //уберем добавленный конец строки
@@ -52,6 +52,8 @@ QString NodeDataViewer::FormattedTagString(QString objName, uint numInBuff, floa
     strcpy(&tag_text[objName.length()+20], tagName.toStdString().c_str());
 
     return QString(tag_text);
+
+
 }
 //=====================================================
 void NodeDataViewer::Timer1sEvent()

@@ -35,7 +35,6 @@ QVector<alarm_tag_struct> vectAlarmTags;
 //Подсистемы СКАДы
 Logger *logger;
 Alarms *alarms;
-OdbcDb *alarmDB;
 
 //===================================================================================================
 bool MainWindow::CheckHash()
@@ -146,10 +145,13 @@ MainWindow::MainWindow(QWidget *parent) :
          {
 
 
-             CommonNode *node = CommonNode::CreateNode(this, objectName,objectType,IP_addr, port,
+             CommonNode *node = CommonNode::CreateNode(objectName,objectType,IP_addr, port,
                                                        port_repl,port_local,
                                                        modbus_start_address, num_float_tags);
 
+             connect(node,SIGNAL(textchange(int,QString,QString)),this,SLOT(TextChanged(int,QString,QString)));
+             connect(node,SIGNAL(textSave2LogFile(int,QString,QString)),this,SLOT(TextSave2LogFile(int,QString,QString)));
+             connect(node,SIGNAL(textchange_repl(int,QString,QString)),this,SLOT(TextChanged_repl(int,QString,QString)));
 
              ui->listWidget->addItem(node->FormattedNodeString());
 
@@ -322,8 +324,6 @@ MainWindow::MainWindow(QWidget *parent) :
     timer5s_checkConnectAndSendToClients.start(5000);
     trendWriterThread.start();
 
-     alarmDB=new OdbcDb("fire_alarmdb","SYSDBA","784523");
-     alarmDB->AddAlarm2DB("Alarms Server Started...");
 
      connect(&timer1s_setAlarmTags,SIGNAL(timeout()),this,SLOT(TimerEvent1s_setAlarmsTags()));
      timer1s_setAlarmTags.start(1000);
@@ -431,6 +431,9 @@ void MainWindow::TimerEvent1s_setAlarmsTags()
 
             bool  tmp_TagQuality=true;
             float tmp_TagValue=0.0;
+            QString tmp_alarmExpression;
+
+            tmp_alarmExpression=alarmDescStruct.alarmExpression;
 
             foreach(alarm_expr_member_struct alarmExprMember, alarmDescStruct.vectAlarmExprMembers)
             {
@@ -441,18 +444,19 @@ void MainWindow::TimerEvent1s_setAlarmsTags()
             {
                 foreach(alarm_expr_member_struct alarmExprMember, alarmDescStruct.vectAlarmExprMembers)
                 {
-                    alarmDescStruct.alarmExpression.replace(alarmExprMember.objectName+"["+QString::number(alarmExprMember.numInBuff)+"]",
+                    tmp_alarmExpression.replace(alarmExprMember.objectName+"["+QString::number(alarmExprMember.numInBuff)+"]",
                                                             QString::number(hashCommonNodes[alarmExprMember.objectName]->m_srv.buff[alarmExprMember.numInBuff]));
 
 
                 }
             //    logger->AddLog(alarmDescStruct.alarmExpression,Qt::black);
-                tmp_TagValue=alarmScriptEngine.evaluate(alarmDescStruct.alarmExpression).toNumber();
+                tmp_TagValue=alarmScriptEngine.evaluate(tmp_alarmExpression).toNumber();
 
                 if ( tmp_TagValue!=tmp_TagValue)  //тривиальная проверка на NaN
                 {
                    tmp_TagValue=0.0;
                    tmp_TagQuality=false;
+                   logger->AddLog("ERROR evaluate alarm formula: "+alarmDescStruct.alarmExpression, Qt::red);
                 }
             }
             else
@@ -532,9 +536,6 @@ MainWindow::~MainWindow()
     {
         delete trend;
     }
-
-    alarmDB->AddAlarm2DB("Alarms Server Closed...");
-    delete alarmDB;
 
     delete ui;
 

@@ -4,11 +4,11 @@
 //======================================================================
 OdbcDb::OdbcDb(QString odbcName,QString user, QString pass)
 {
-logger=Logger::Instance();
-this->odbcName=odbcName;
-this->user=user;
-this->pass=pass;
-counter=0;
+    logger=Logger::Instance();
+    this->odbcName=odbcName;
+    this->user=user;
+    this->pass=pass;
+    counter=0;
 }
 //=======================================================================
 OdbcDb::~OdbcDb()
@@ -17,12 +17,12 @@ OdbcDb::~OdbcDb()
 //=======================================================================
 QString OdbcDb::GetNextName()
 {
-QString res;
-counterMutex.lock();
-res.sprintf("%u",counter);
-counter=(counter+1) % 1000000;
-counterMutex.unlock();
-return res;
+    QString res;
+    counterMutex.lock();
+    res.sprintf("%u",counter);
+    counter=(counter+1) % 1000000;
+    counterMutex.unlock();
+    return res;
 }
 //=======================================================================
 bool OdbcDb::ExecQuery(QString query)

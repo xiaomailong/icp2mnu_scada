@@ -31,11 +31,11 @@ CommonNode::~CommonNode()
 
 }
 //================================================================================
-CommonNode* CommonNode::CreateNode(MainWindow *mw ,QString objectName,QString objectType,
-                                  QString IP_addr, uint port,
-                                  uint port_repl,uint port_local,
-                                  uint modbus_start_address,
-                                  uint num_float_tags)
+CommonNode* CommonNode::CreateNode(QString objectName,QString objectType,
+                                   QString IP_addr, uint port,
+                                   uint port_repl,uint port_local,
+                                   uint modbus_start_address,
+                                   uint num_float_tags)
 {
 
 CommonNode *node=NULL;
@@ -45,9 +45,6 @@ CommonNode *node=NULL;
         node = new ModbusNode(nodes_counter,objectName,objectType,
                                           IP_addr, port,port_repl,port_local,
                                           modbus_start_address,num_float_tags);
-
-        QObject::connect(node,SIGNAL(textchange(int,QString,QString)),mw,SLOT(TextChanged(int,QString,QString)));
-        QObject::connect(node,SIGNAL(textSave2LogFile(int,QString,QString)),mw,SLOT(TextSave2LogFile(int,QString,QString)));
     }
 
     if (objectType=="mnu_scada")
@@ -55,10 +52,6 @@ CommonNode *node=NULL;
         node = new MnuScadaNode(nodes_counter,objectName,objectType,
                                             IP_addr, port,port_repl,port_local,
                                             modbus_start_address,num_float_tags);
-
-        QObject::connect(node,SIGNAL(textchange(int,QString,QString)),mw,SLOT(TextChanged(int,QString,QString)));
-        QObject::connect(node,SIGNAL(textSave2LogFile(int,QString,QString)),mw,SLOT(TextSave2LogFile(int,QString,QString)));
-        QObject::connect(node,SIGNAL(textchange_repl(int,QString,QString)),mw,SLOT(TextChanged_repl(int,QString,QString)));
 
     }
 
@@ -68,9 +61,6 @@ CommonNode *node=NULL;
                                           IP_addr, port,port_repl,port_local,
                                           modbus_start_address,num_float_tags);
 
-
-        QObject::connect(node,SIGNAL(textchange(int,QString,QString)),mw,SLOT(TextChanged(int,QString,QString)));
-        QObject::connect(node,SIGNAL(textSave2LogFile(int,QString,QString)),mw,SLOT(TextSave2LogFile(int,QString,QString)));
     }
 
     nodes_counter++;
@@ -83,6 +73,8 @@ QString CommonNode::FormattedNodeString()
     char node_text[256];
     for (uint i=0;i<255;++i) node_text[i]=' ';
     node_text[255]=0;
+
+    //Небезопасно - по хорошему переделать на strncpy, а лучше на strlcpy, но его нет в mingw
 
     strcpy(&node_text[0],  m_nameObject.toStdString().c_str());
     node_text[strlen(node_text)]=' '; //уберем добавленный конец строки
@@ -100,6 +92,18 @@ QString CommonNode::FormattedNodeString()
 
    return QString(node_text);
 
+/*  c++ + Qt
+    QString node_text;
+    node_text.fill(' ',134);
+    node_text.replace(0,m_nameObject.length(),m_nameObject);
+    node_text.replace(20,(m_IP_addr+":" + QString::number(m_port)).length(),(m_IP_addr+":" + QString::number(m_port)));
+    node_text.replace(39,(QString("(") + m_typeObject).length(),(QString("(") + m_typeObject));
+    node_text.replace(49,(QString(",tags=") + QString::number(m_srv.num_float_tags)+")").length(),(QString(",tags=") + QString::number(m_srv.num_float_tags)+")"));
+    node_text.replace(59,(m_text_client+ " " + m_text_repl).length(),(m_text_client+ " " + m_text_repl));
+    node_text.replace(76,(QString(" ---> 127.0.0.1:")+ QString::number(m_port_local) + "(MADBUS)  === ").length(),(QString(" ---> 127.0.0.1:")+ QString::number(m_port_local) + "(MADBUS)  === "));
+    node_text.replace(111,QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz").length(),QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+    return node_text;
+*/
 }
 //================================================================================
 ModbusNode::ModbusNode(int this_number,QString objectName,QString objectType,
@@ -155,8 +159,6 @@ uint16_t tab_reg[200];
                    emit textchange(this->m_this_number,this->m_nameObject,  "connected");
                    emit textSave2LogFile(this->m_this_number,this->m_nameObject,  "connected");
                    //srv->m_pServerSocket->setSocketOption(QAbstractSocket:: KeepAliveOption, 1);
-
-
                 }
                 else
                 {
@@ -171,12 +173,6 @@ uint16_t tab_reg[200];
                 res=modbus_read_registers(mb, this->m_modbus_start_address, m_srv.num_float_tags*2, tab_reg);
                 if (res==m_srv.num_float_tags*2)
                 {
-               //     buff[0]=buff[0]+1;
-               //     buff[1]=buff[1]+2;
-               //     buff[2]=buff[2]+3;
-               //     buff[3]=buff[3]+10;
-               //     buff[4]=buff[4]+100;
-
                     for (uint nn=0;nn < m_srv.num_float_tags;++nn)
                     {
                         m_srv.buff[nn]=modbus_get_float(&tab_reg[nn*2]);
@@ -188,14 +184,11 @@ uint16_t tab_reg[200];
 
                 else  //error read? closing
                 {
-
                     m_isConnected=false;
                     m_isReaded=false;
                     modbus_close(mb);
                     emit textchange(this->m_this_number,this->m_nameObject,  "disconnected");
                     emit textSave2LogFile(this->m_this_number,this->m_nameObject,  "disconnected");
-
-
                 }
 
 
@@ -258,12 +251,6 @@ MnuScadaNode::~MnuScadaNode()
 //===================================================================================
 void MnuScadaNode::doConnect()
 {
-
-
-
-
-    //qDebug() << "connecting...";
-
     // this is not blocking call
     socket->connectToHost(m_IP_addr, m_port);
     //isConnecting=true;
@@ -276,35 +263,27 @@ void MnuScadaNode::doConnect()
 //==================================================================================
 void MnuScadaNode::TimerConnectLoopEvent()
 {
-//    qDebug() << "timer event: ";
+//    qDebug() << "timer connect loop event: ";
 
+    if (getStateConnected()==false && getStateConnecting()==false)
+    {
+        doConnect();
 
-        if (getStateConnected()==false && getStateConnecting()==false)
+    }
+
+    //if no data 20 seconds - reconnect
+
+    if (m_sec_counter==0) //раз в 20 секунд
+    {
+        if (m_num_reads==0 && getStateConnected()==true)
         {
-            doConnect();
-
+            socket->disconnectFromHost();
+            //qDebug() << "error - no data in 20 sec";
         }
+        m_num_reads=0;
+    }
 
-
-    //alarm loop
-
-        //if no data 20 seconds - reconnect
-
-
-        if (m_sec_counter==0) //раз в 20 секунд
-        {
-            if (m_num_reads==0 && getStateConnected()==true)
-            {
-                socket->disconnectFromHost();
-                qDebug() << "error - no data in 20 sec";
-            }
-            m_num_reads=0;
-        }
-
-        m_sec_counter=(m_sec_counter+1)%20;
-
-
-
+    m_sec_counter=(m_sec_counter+1)%20;
 
 }
 //====================================================================================
@@ -312,9 +291,6 @@ void MnuScadaNode::connected()
 {
     qDebug() << "connected...";
 
-
-    //isConnected=true;
-    //isConnecting=false;
     m_isReaded=false;
     m_isConnected=true;
     emit textchange(this->m_this_number,this->m_nameObject,  "connected");
@@ -338,14 +314,10 @@ void MnuScadaNode::error(QAbstractSocket::SocketError err)
     socket->disconnectFromHost();
     qDebug() << "error " + QString::number(err);
     m_isReaded=false;
-    //if (isConnecting)
-    //isConnecting=false;
-
 }
 //=======================================================================================
 void MnuScadaNode::disconnected()
 {
-    //isConnecting=false;
     m_isReaded=false;
     m_isConnected=false;
 
@@ -525,22 +497,16 @@ void MnuScadaNode::run()
 {
     QTcpSocket repl_socket;
     int aligner=0;
-   // for (int i=0;i<30;++i)
-   // {
-        Sleep(1000);
-   //     if (CheckThreadStop()){return;}
-   // }
+
+    msleep(1000);
 
         for (int cycles_cnt=0;cycles_cnt<2;++cycles_cnt)
         {
-            //	AfxMessageBox(this_server_info->IP_address);
             for(uint i=0;i<vectCommonTrends.size();i++)
             {
 
                 if (this->m_nameObject==vectCommonTrends[i]->m_objectName)
                 {
-              //      try
-              //      {
                         repl_socket.connectToHost(m_IP_addr, m_port_repl);
                         if (repl_socket.waitForConnected(5000))  //true if connected
                         {
@@ -549,9 +515,6 @@ void MnuScadaNode::run()
                             float buff_file[17280];
 
                             QDateTime now_time=QDateTime::currentDateTime();
-
-
-
 
                             int rrYear_st=now_time.date().year();
                             int rrMonth_st=now_time.date().month();
@@ -567,7 +530,7 @@ void MnuScadaNode::run()
 
                             int Position_end=(now_time.time().hour()*60*60+now_time.time().minute()*60+now_time.time().second())/5;
 
-                            //interval zatyagivania - 4 weeks
+                            //interval of trend replication - 4 weeks
                             MinusInterval(rrYear_st,rrMonth_st,rrDay_st,rrHour_st,rrMinute_st,rrSecond_st,86400*7*4);
 
                             for(;!(rrYear_st==rrYear_end && rrMonth_st==rrMonth_end && rrDay_st==rrDay_end);
@@ -590,10 +553,8 @@ void MnuScadaNode::run()
                                     }
 
                                 }
-                                //else
-                                //{
-                                        trend_file.open(QIODevice::ReadWrite);
-                                //}
+                                trend_file.open(QIODevice::ReadWrite);
+
 
                                 trend_file.read((char *)buff_file,69120);
 
@@ -612,7 +573,7 @@ void MnuScadaNode::run()
                                     {
                                         struct zapros
                                         {
-                                            char FileName[32];//int TagNo;
+                                            char FileName[32];
                                             int Year,Month,Day;
                                             int Position;
                                             int Count;
@@ -624,7 +585,6 @@ void MnuScadaNode::run()
 
                                         pos_kon=j;
                                         nachalo_naideno=false;
-                                        //zapr.TagNo=repl_info[i].nomer;
                                         strcpy(zapr.FileName,vectCommonTrends[i]->m_trendName.toStdString().c_str());
                                         zapr.Year=rrYear_st;
                                         zapr.Month=rrMonth_st;
@@ -640,34 +600,21 @@ void MnuScadaNode::run()
                                         //qDebug() << "zapr: " << zapr.Count;
 
                                         float buff_new[300];
-                                        //for (int k=0;k<300;k++) {buff_new[k]=min_float;}
                                         int result;
                                         result=repl_socket.write((char *)&zapr,sizeof(zapr));
 
-                                        //qDebug() << "repl write" << repl_socket.waitForBytesWritten(5000);
-                                        //result=repl_socket.Send(&zapr,sizeof(zapr));
                                         if (result!=SOCKET_ERROR)
                                         {
-                                            //    Sleep(500);
-                                            //maybe block call
                                             repl_socket.waitForReadyRead(5000);
-
                                             result=repl_socket.read((char *)buff_new,(zapr.Count)*4);
-                                        //qDebug() << "repl read" << result;
-                                        //qDebug() << buff_new[0] << buff_new[1];
 
-                                            //	if (!(result==0 || result==SOCKET_ERROR))
                                             if (result==zapr.Count*4)
                                             {
-                                                //qDebug() << "result==zapr.Count*4";
-
                                                 trend_file.seek(pos_nach*4);//,CFile::begin);
                                                 trend_file.write((char *)buff_new,(zapr.Count)*4);
                                                 //trend_file.Flush();
-
                                                 if (CheckThreadStop()){qDebug() << "111111111111111111111111111111111111111111"; return;}
                                             }
-                                            //Sleep(500); //задержка, чтоб не завалить сайтект и сеть
                                         }
                                     }
                                 }
@@ -677,13 +624,9 @@ void MnuScadaNode::run()
                         }
                         repl_socket.close();
                         if (CheckThreadStop()) {qDebug() << "3333333333333333333333333333333333333333333333"; return;}
-                //    }
-                //    catch (...)
-                //    {AfxMessageBox("dcxgvf");
-                //    }
                 }
             }
-            //Sleep(5*60*1000);
+
             if (need_restart_repl==true) {cycles_cnt=0;need_restart_repl=false;}
         }
 
