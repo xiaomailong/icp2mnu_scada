@@ -4,7 +4,9 @@
 #include <QObject>
 #include <QString>
 #include <QMutex>
-#include <logger.h>
+#include <QSettings>
+#include <QTextCodec>
+#include "logger.h"
 
 
 

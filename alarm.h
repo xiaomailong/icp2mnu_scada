@@ -7,10 +7,13 @@
 #include <QColor>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include "tag.h"
-#include "logger.h"
+#include <QSettings>
 
 #include "autostopthread.h"
+#include "tag.h"
+#include "logger.h"
+#include "odbcdb.h"
+
 
 const uint ALARM_MESSAGE_TEXT=128;
 

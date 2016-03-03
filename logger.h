@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QColor>
 #include <QMutex>
+#include <QDateTime>
+
 //#include <list>
 
 //using std::list; -// расскомментировать messageList в .h и .cpp

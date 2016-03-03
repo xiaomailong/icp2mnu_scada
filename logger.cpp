@@ -1,11 +1,9 @@
 #include "logger.h"
 #include "ui_logger.h"
-#include <QDateTime>
 
-
+//выделяем память под статик-члены класса Logger
 Logger* Logger::theSingleInstanceLogger=NULL;
 LoggerWindow* Logger::theSingleInstanceLoggerWindow=NULL;
-//list<Message> Logger2::messageList;
 QMutex Logger::mutex;
 
 //====================================================================
@@ -58,36 +56,33 @@ return theSingleInstanceLogger;
 //=====================================================================
 LoggerWindow* Logger::InstanceWindow()
 {
-mutex.lock();
-if(theSingleInstanceLoggerWindow==NULL)
-      {
-           theSingleInstanceLoggerWindow=new LoggerWindow;
-           connect(theSingleInstanceLogger,SIGNAL(signalAddMessage(QString,QColor)),theSingleInstanceLoggerWindow,SLOT(AddMessage(QString,QColor)));
+     mutex.lock();
 
-//                foreach(Message msg_tmp,messageList)
-//                {
-//                theSingleInstanceLoggerWindow->AddMessage(msg_tmp.what,msg_tmp.color);
-//                }
-//                messageList.clear();
-       }
-       mutex.unlock();
-return theSingleInstanceLoggerWindow;
+     if(theSingleInstanceLoggerWindow==NULL)
+     {
+        theSingleInstanceLoggerWindow=new LoggerWindow;
+        connect(theSingleInstanceLogger,SIGNAL(signalAddMessage(QString,QColor)),theSingleInstanceLoggerWindow,SLOT(AddMessage(QString,QColor)));
+     }
+
+     mutex.unlock();
+
+     return theSingleInstanceLoggerWindow;
 }
 //=====================================================================
 void Logger::AddLog(QString what, QColor color)
 {
-//            mutex.lock();
-//            if (theSingleInstanceLoggerWindow==NULL)
-//            {
-//             Message tmp_msg;
-//             tmp_msg.what=what;
-//             tmp_msg.color=color;
-//             messageList.push_back(tmp_msg);
-//            }
-//            else
-//            {
-emit signalAddMessage(what, color);
-//            }
-//            mutex.unlock();
+    //            mutex.lock();
+    //            if (theSingleInstanceLoggerWindow==NULL)
+    //            {
+    //             Message tmp_msg;
+    //             tmp_msg.what=what;
+    //             tmp_msg.color=color;
+    //             messageList.push_back(tmp_msg);
+    //            }
+    //            else
+    //            {
+    emit signalAddMessage(what, color);
+    //            }
+    //            mutex.unlock();
 }
 //=====================================================================

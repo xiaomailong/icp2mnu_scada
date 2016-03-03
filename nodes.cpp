@@ -1,5 +1,5 @@
 #include "nodes.h"
-#include "logger.h"
+
 
 extern const char *trend_path;
 extern const float min_float=-3.4028234663852886e+38;
@@ -24,6 +24,11 @@ CommonNode::CommonNode()
     m_text_repl="";
     m_isConnected=false;
     m_isReaded=false;
+}
+//================================================================================
+CommonNode::~CommonNode()
+{
+
 }
 //================================================================================
 CommonNode* CommonNode::CreateNode(MainWindow *mw ,QString objectName,QString objectType,

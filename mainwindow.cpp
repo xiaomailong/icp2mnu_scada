@@ -160,7 +160,7 @@ MainWindow::MainWindow(QWidget *parent) :
              if (!nodeDir.exists()) nodeDir.mkdir(QString(trend_path)+"\\"+node->m_nameObject);
 
              logger->AddLog("Added Node: "+node->m_nameObject+": " + node->m_IP_addr+":" + QString::number(node->m_port)+
-                                   "(" + node->m_typeObject + ", tags=" + QString::number(node->m_srv.num_float_tags),Qt::black);
+                                   "(" + node->m_typeObject + ", tags=" + QString::number(node->m_srv.num_float_tags)+")",Qt::black);
           }
 
          //[TRENDS]
@@ -342,8 +342,6 @@ void MainWindow::alarmsChanged(QList < Alarm* > *pEnabledAlarmList, bool onlyCol
     ui->alarmWidget->clear();
         foreach(Alarm *alarm, *pEnabledAlarmList)
         {
-
-            //if (i<5)
             {
                 QString alarmstr;
 
@@ -382,8 +380,6 @@ void MainWindow::alarmsChanged(QList < Alarm* > *pEnabledAlarmList, bool onlyCol
     {
         foreach(Alarm *alarm, *pEnabledAlarmList)
         {
-
-            //if (i<5)
             {
                 if (!alarm->IsConfirmed() && alarm->IsActive())
                 {
@@ -396,10 +392,6 @@ void MainWindow::alarmsChanged(QList < Alarm* > *pEnabledAlarmList, bool onlyCol
                         ui->alarmWidget->item(i)->setBackground(alarm->actColor);
                     }
                 }
-//                else
-//                {
-//                    ui->alarmWidget->item(i)->setBackground(alarm->actColor);
-//                }
             }
         ++i;
         }
@@ -425,15 +417,7 @@ void MainWindow::buttonMessagesShow_clicked()
 void MainWindow::TimerEvent1s_setAlarmsTags()
 {
 
-/*    static int firstcycles=0;
-    //пропустим 2 цикла - дадим возможность подключиться
-    if (firstcycles<2)
-    {
-        firstcycles++;
-        return;
-    }
-*/
-static QScriptEngine alarmScriptEngine;
+    static QScriptEngine alarmScriptEngine;
 
     foreach(alarm_tag_struct alarmDescStruct, vectAlarmTags)
     {
@@ -484,14 +468,12 @@ static QScriptEngine alarmScriptEngine;
 void MainWindow::TimerEvent5s()
 {
 
-    //for (int i=0;i<listCommonNodes.size();++i)
     foreach(CommonNode* node,hashCommonNodes)
     {
        if (node->m_isReaded &&
            !node->m_srv.m_pServerSocket->isListening())
        {
            node->m_srv.m_pServerSocket->listen(QHostAddress::Any, node->m_port_local);
-
        }
 
        if( node->m_isReaded &&
@@ -502,15 +484,12 @@ void MainWindow::TimerEvent5s()
                node->m_srv.m_pClientSocketList.at(j)->write((char *)node->m_srv.buff,node->m_srv.num_float_tags*4);
 
            }
-
-
        }
 
 
        if( !node->m_isReaded &&
            node->m_srv.m_pServerSocket->isListening())
        {
-
            for(int j=0;j<node->m_srv.m_pClientSocketList.size();j++)
            {
                node->m_srv.m_pClientSocketList.at(j)->close();
@@ -518,13 +497,8 @@ void MainWindow::TimerEvent5s()
 
            node->m_srv.m_pServerSocket->close();
            node->m_srv.m_pClientSocketList.clear();
-
        }
-
-
     }
-
-
 }
 
 //==================================================================================
@@ -537,13 +511,10 @@ MainWindow::~MainWindow()
     timer5s_checkConnectAndSendToClients.stop();
     timer1s_setAlarmTags.stop();
 
-    //for (int i=0;i<listCommonNodes.size();++i)
     foreach(CommonNode* node,hashCommonNodes)
     {
         delete node;
     }
-
-    //Sleep(3000); //delay to get time to threads stop
 
     foreach(alarm_tag_struct alarmTg, vectAlarmTags)
     {
@@ -562,7 +533,6 @@ MainWindow::~MainWindow()
         delete trend;
     }
 
-    //hashCommonNodes.clear();
     alarmDB->AddAlarm2DB("Alarms Server Closed...");
     delete alarmDB;
 
@@ -595,7 +565,6 @@ void MainWindow::TextChanged_repl(int iUzel, QString objectName, QString newText
 void MainWindow::TextSave2LogFile(int iUzel, QString objectName, QString newText)
 {
 
-
     if (iUzel==-1)    //global event
     {
         QString filename;
@@ -605,85 +574,70 @@ void MainWindow::TextSave2LogFile(int iUzel, QString objectName, QString newText
 
         QFile netlog(filename);
 
-
-
-            if (netlog.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
-                {
-                QString tmp;
-                 tmp.sprintf("%s --- %s\n",QDateTime::currentDateTime().toString("hh:mm:ss.zzz").toStdString().c_str(),
-                             newText.toStdString().c_str());
-                netlog.write( tmp.toStdString().c_str());
-                netlog.close();
-                }
+        if (netlog.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+        {
+             QString tmp;
+             tmp.sprintf("%s --- %s\n",QDateTime::currentDateTime().toString("hh:mm:ss.zzz").toStdString().c_str(),
+                         newText.toStdString().c_str());
+             netlog.write( tmp.toStdString().c_str());
+             netlog.close();
+        }
     }
-    else              //uzel event
+    else              //node event
     {
-       // QMessageBox::information(this,"Configuration message","Your configuration is incorrect - no IP address!!!",QMessageBox::Ok);
         QString filename;
-
         filename.sprintf("netlog\\%s.log",QDateTime::currentDateTime().toString("yyyy_MM_dd").toStdString().c_str());
-
 
         QFile netlog(filename);
 
-
-
             if (netlog.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
-                {
+            {
                 QString tmp;
-                 tmp.sprintf("%s --- %s(%s) %s\n",QDateTime::currentDateTime().toString("hh:mm:ss.zzz").toStdString().c_str(),
+                tmp.sprintf("%s --- %s(%s) %s\n",QDateTime::currentDateTime().toString("hh:mm:ss.zzz").toStdString().c_str(),
                              hashCommonNodes[objectName]->m_nameObject.toStdString().c_str(),
                              hashCommonNodes[objectName]->m_IP_addr.toStdString().c_str(),
                              newText.toStdString().c_str());
                 netlog.write( tmp.toStdString().c_str());
                 netlog.close();
-                }
-
+            }
     }
-
-
-
-
 }
 //========================================================================================
 void FuncFileWriter(CommonTrend *this_trend_info, char *str_date, uint time_pos)
 {
-//char filename[256];
+    QString filename;
 
-QString filename;
+    filename.sprintf("%s%s\\%s_%s.trn",trend_path,this_trend_info->m_objectName.toStdString().c_str(),this_trend_info->m_trendName.toStdString().c_str(),str_date);
 
-filename.sprintf("%s%s\\%s_%s.trn",trend_path,this_trend_info->m_objectName.toStdString().c_str(),this_trend_info->m_trendName.toStdString().c_str(),str_date);
+    QFile trend(filename);
 
-QFile trend(filename);
-
-
-if (!trend.exists())  //Open(filename,CFile::modeWrite|CFile::modeNoTruncate|CFile::shareDenyNone,NULL))
-    {
-
-        if (trend.open(QIODevice::ReadWrite))
+    if (!trend.exists())  //Open(filename,CFile::modeWrite|CFile::modeNoTruncate|CFile::shareDenyNone,NULL))
         {
-            trend.write((char *)&empty_file[0],69120);
+
+            if (trend.open(QIODevice::ReadWrite))
+            {
+                trend.write((char *)&empty_file[0],69120);
+                trend.seek(time_pos*4);//, CFile::begin);
+                trend.write((char *)&(hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
+                trend.close();
+            }
+        }
+        else
+        {
+            trend.open(QIODevice::ReadWrite);
             trend.seek(time_pos*4);//, CFile::begin);
             trend.write((char *)&(hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
             trend.close();
         }
-    }
-    else
-    {
-        trend.open(QIODevice::ReadWrite);
-        trend.seek(time_pos*4);//, CFile::begin);
-        trend.write((char *)&(hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
-        trend.close();
-    }
 
-return;
+    return;
 }
 //=========================================================================================
 
 void TrendWriterThread::run()
 {
 
-int itime,iprevtime=100;
+    int itime,iprevtime=100;
 
     for(;;)
     {
@@ -739,28 +693,13 @@ void MainWindow::pushTestButton()
     }
     first_call=false;
 
-
 }
 
 //=========================================================================================
 void MainWindow::ViewNodeData(QListWidgetItem *item)
 {
-/*
-    foreach(CommonNode *node,hashCommonNodes)
-    {
-        if (node->m_this_number==ui->listWidget->
-        {
-            NodeDataViewer *ndw=new NodeDataViewer(node ,this);
-            ndw->show();
-            break;
-        }
-    }
-*/
-
     QString objName=item->text();
-    //    qDebug() << objName;
     objName=objName.left(objName.indexOf(' '));
-    //    qDebug() << objName;
 
     if (hashCommonNodes.contains(objName))
     {

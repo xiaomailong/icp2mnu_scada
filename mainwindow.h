@@ -6,7 +6,6 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QListWidgetItem>
-//#include "nodes.h"
 #include "alarm.h"
 #include "autostopthread.h"
 

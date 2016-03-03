@@ -66,7 +66,6 @@ bool ConfigReader::ReadNextNode(QString &objectName,QString &objectType,QString 
                                        uint &port,uint &port_repl,uint &port_local,
                                        uint &modbus_start_address,uint &num_float_tags)
 {
-
     if (!foundSectionNodes)
     {
         while(!configFile.atEnd())

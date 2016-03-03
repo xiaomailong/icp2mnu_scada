@@ -1,6 +1,4 @@
 #include "tag.h"
-#include <QSettings>
-#include <QTextCodec>
 
 //================================================================================
 FloatTag::FloatTag()
@@ -14,7 +12,6 @@ FloatTag::FloatTag()
 //===============================================================================
 FloatTag::FloatTag(const char *Trendname,bool isDiskSavedvar)
 {
-//QTextCodec::setCodecForCStrings(QTextCodec::codecForName("Windows-1251"));  //Задаем шрифт системы
     tagFirstTimeSet=true;
     quality=false;
     value=0;
@@ -23,11 +20,10 @@ FloatTag::FloatTag(const char *Trendname,bool isDiskSavedvar)
 
     if (isDiskSavedVar && strcmp(TrendName,""))
     {
-    QString tmp;
-    tmp.sprintf("%s",TrendName);
-    QSettings settings(QSettings::IniFormat,QSettings::SystemScope, "QtSCADA", "DiskVars");
-    SetValueQuality(settings.value(tmp,0).toFloat(),true);
-//    logger->AddLog(QString("TAG: Переменная ")+Trendname+" дисковая",Qt::darkCyan);
+        QString tmp;
+        tmp.sprintf("%s",TrendName);
+        QSettings settings(QSettings::IniFormat,QSettings::SystemScope, "QtSCADA", "DiskVars");
+        SetValueQuality(settings.value(tmp,0).toFloat(),true);
     }
 
 }
@@ -43,23 +39,23 @@ FloatTag::FloatTag(QString Trendname)
 //=================================================================================
 FloatTag::operator float()
 {
-return GetValue();
+    return GetValue();
 }
 
 //=================================================================================
 float FloatTag::operator = (const float & other)
 {
-//float tmp;
-SetValueQuality(other,true);
-return GetValue();
-//return tmp;
+    //float tmp;
+    SetValueQuality(other,true);
+    return GetValue();
+    //return tmp;
 }
 //=================================================================================
 QString FloatTag::ToString(const char *format)
 {
-QString tmp;
-tmp.sprintf(format,GetValue());
-return tmp;
+    QString tmp;
+    tmp.sprintf(format,GetValue());
+    return tmp;
 }
 //=================================================================================
 void FloatTag::SetValueQuality(float newValue, bool newQuality)
@@ -75,10 +71,10 @@ void FloatTag::SetValueQuality(float newValue, bool newQuality)
 
     if (isDiskSavedVar && strcmp(TrendName,""))
     {
-    QSettings settings(QSettings::IniFormat,QSettings::SystemScope, "QtSCADA", "DiskVars");
-    QString tmp;
-    tmp.sprintf("%s",TrendName);
-    settings.setValue(tmp,GetValue());
+        QSettings settings(QSettings::IniFormat,QSettings::SystemScope, "QtSCADA", "DiskVars");
+        QString tmp;
+        tmp.sprintf("%s",TrendName);
+        settings.setValue(tmp,GetValue());
     }
 
     if (tagFirstTimeSet)
@@ -89,8 +85,8 @@ void FloatTag::SetValueQuality(float newValue, bool newQuality)
     }
     else
     {
-    if (/*tmpValue!=newValue && */newQuality) emit ValueChanged(value); //comment 17.11.2015 - для реализации задержки по алармам
-    if (tmpQuality!=newQuality) emit QualityChanged(quality);
+        if (/*tmpValue!=newValue && */newQuality) emit ValueChanged(value); //comment 17.11.2015 - для реализации задержки по алармам
+        if (tmpQuality!=newQuality) emit QualityChanged(quality);
     }
 }
 //==================================================================================
@@ -123,6 +119,6 @@ float FloatTag::GetValueForTrend()
 //===================================================================================
 char* FloatTag::GetTrendName()
 {
-return TrendName;
+    return TrendName;
 }
 //===================================================================================

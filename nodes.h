@@ -9,6 +9,7 @@
 #include "mainwindow.h"
 #include "autostopthread.h"
 #include "srvretranslater.h"
+#include "logger.h"
 #include "./src_libmodbus/modbus.h"
 //==============================================================
 struct virt_expr_member_struct
@@ -54,7 +55,7 @@ class CommonNode: public AutoStopThread
 public:
 
     CommonNode();
-    virtual ~CommonNode() {}
+    virtual ~CommonNode();
 
     static CommonNode* CreateNode(MainWindow *mw ,QString objectName,QString objectType,
                                   QString IP_addr, uint port,
@@ -68,7 +69,7 @@ public:
     unsigned int m_port;
     unsigned int m_port_repl;
     QString m_nameObject;
-    QString m_typeObject;   //modbus or mnu_scada
+    QString m_typeObject;   //modbus or mnu_scada or virtual
 
     QString m_text_client;
     QString m_text_repl;

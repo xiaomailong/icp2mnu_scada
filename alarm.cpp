@@ -1,7 +1,4 @@
 #include "alarm.h"
-#include <QSettings>
-#include "odbcdb.h"
-
 
 extern Alarms *alarms;
 extern OdbcDb *alarmDB;
@@ -13,25 +10,25 @@ bool operator<(const alarm_expr_member_struct &a, const alarm_expr_member_struct
 //==================================================================
 bool compare_alarms(Alarm *first,Alarm *second)
 {
-if (!second->IsConfirmed() && first->IsConfirmed()) return false;
-if (!first->IsConfirmed() && second->IsConfirmed()) return true;
-return (first->dt_activated >= second->dt_activated);
+    if (!second->IsConfirmed() && first->IsConfirmed()) return false;
+    if (!first->IsConfirmed() && second->IsConfirmed()) return true;
+    return (first->dt_activated >= second->dt_activated);
 }
 
 //=================================================================
 bool Alarm::IsActive()
 {
-return active;
+    return active;
 }
 //=================================================================
 bool Alarm::IsConfirmed()
 {
-return confirmed;
+    return confirmed;
 }
 //=================================================================
 void Alarm::SetActive(bool newactive)
 {
-active=newactive;
+    active=newactive;
 }
 //=================================================================
 void Alarm::SetConfirmed(bool newconfirmed)
@@ -64,87 +61,86 @@ QString Alarm::GetTextOfAlarm()
 //=================================================================
 QString Alarm::GetDateTimeOfAlarmActivating()
 {
-QString tmp;
-tmp.sprintf("%.2u.%.2u.%.4u %.2u:%.2u:%.2u",
-            dt_activated.date().day(),dt_activated.date().month(),dt_activated.date().year(),
-            dt_activated.time().hour(),dt_activated.time().minute(),dt_activated.time().second());
-return tmp;
+    QString tmp;
+    tmp.sprintf("%.2u.%.2u.%.4u %.2u:%.2u:%.2u",
+                dt_activated.date().day(),dt_activated.date().month(),dt_activated.date().year(),
+                dt_activated.time().hour(),dt_activated.time().minute(),dt_activated.time().second());
+    return tmp;
 }
 //=================================================================
 QString Alarm::GetDateTimeOfAlarmDeactivating()
 {
-QString tmp;
-tmp.sprintf("%.2u.%.2u.%.4u %.2u:%.2u:%.2u",
-            dt_deactivated.date().day(),dt_deactivated.date().month(),dt_deactivated.date().year(),
-            dt_deactivated.time().hour(),dt_deactivated.time().minute(),dt_deactivated.time().second());
-return tmp;
+    QString tmp;
+    tmp.sprintf("%.2u.%.2u.%.4u %.2u:%.2u:%.2u",
+                dt_deactivated.date().day(),dt_deactivated.date().month(),dt_deactivated.date().year(),
+                dt_deactivated.time().hour(),dt_deactivated.time().minute(),dt_deactivated.time().second());
+    return tmp;
 }
 //=================================================================
 QString Alarm::GetDateTimeOfAlarmConfirming()
 {
-QString tmp;
-tmp.sprintf("%.2u.%.2u.%.4u %.2u:%.2u:%.2u",
-            dt_confirmed.date().day(),dt_confirmed.date().month(),dt_confirmed.date().year(),
-            dt_confirmed.time().hour(),dt_confirmed.time().minute(),dt_confirmed.time().second());
-return tmp;
+    QString tmp;
+    tmp.sprintf("%.2u.%.2u.%.4u %.2u:%.2u:%.2u",
+                dt_confirmed.date().day(),dt_confirmed.date().month(),dt_confirmed.date().year(),
+                dt_confirmed.time().hour(),dt_confirmed.time().minute(),dt_confirmed.time().second());
+    return tmp;
 }
 //=================================================================
 void Alarm::SetDateTimeOfAlarmActivating()
 {
-dt_activated=QDateTime::currentDateTime();
-//QThread::msleep(20);
+    dt_activated=QDateTime::currentDateTime();
 }
 //=================================================================
 void Alarm::SetDateTimeOfAlarmDeactivating()
 {
-dt_deactivated=QDateTime::currentDateTime();
+    dt_deactivated=QDateTime::currentDateTime();
 }
 //=================================================================
 void Alarm::SetDateTimeOfAlarmConfirming()
 {
-dt_confirmed=QDateTime::currentDateTime();
+    dt_confirmed=QDateTime::currentDateTime();
 }
 //=================================================================
 Alarm::Alarm(int id, AlarmLevel alarmlevel, AlarmType alarmtype, FloatTag *tag, AlarmCondition alarmcondition,
              float alarmvalue, QString alarmtext, uint alarmdelaySec)
 {
-ID=id;
-preactive=false;
-active=false;
-confirmed=false;
-alarmlevel=alarmlevel;
-alarmCondition=alarmcondition;
-alarmValue=alarmvalue;
-text=alarmtext;
-delaySec=alarmdelaySec;
+    ID=id;
+    preactive=false;
+    active=false;
+    confirmed=false;
+    alarmlevel=alarmlevel;
+    alarmCondition=alarmcondition;
+    alarmValue=alarmvalue;
+    text=alarmtext;
+    delaySec=alarmdelaySec;
 
-if (alarmlevel==Critical)
-{
-actColor.setRgb(255,0,0);
-nonactColor.setRgb(177,182,184);
-act2Color.setRgb(255,128,128);
-}
-if (alarmlevel==Warning)
-{
-actColor.setRgb(255,255,0);
-nonactColor.setRgb(177,182,184);
-act2Color.setRgb(177,182,184);
-}
+    if (alarmlevel==Critical)
+    {
+        actColor.setRgb(255,0,0);
+        nonactColor.setRgb(177,182,184);
+        act2Color.setRgb(255,128,128);
+    }
+    if (alarmlevel==Warning)
+    {
+        actColor.setRgb(255,255,0);
+        nonactColor.setRgb(177,182,184);
+        act2Color.setRgb(177,182,184);
+    }
 
-if (alarmlevel==Information)
-{
-actColor.setRgb(31,84,224);
-nonactColor.setRgb(177,182,184);
-act2Color.setRgb(143,170,239);
-}
+    if (alarmlevel==Information)
+    {
+        actColor.setRgb(31,84,224);
+        nonactColor.setRgb(177,182,184);
+        act2Color.setRgb(143,170,239);
+    }
 
-if (alarmtype==OnValueChanged)
-connect(tag,SIGNAL(ValueChanged(float)),this,SLOT(TagValueChanged(float)));
-if (alarmtype==OnQualityChanged)
-    connect(tag,SIGNAL(QualityChanged(bool)),this,SLOT(TagQualityChanged(bool)));
+    if (alarmtype==OnValueChanged)
+    connect(tag,SIGNAL(ValueChanged(float)),this,SLOT(TagValueChanged(float)));
+    if (alarmtype==OnQualityChanged)
+        connect(tag,SIGNAL(QualityChanged(bool)),this,SLOT(TagQualityChanged(bool)));
 
-connect(this,SIGNAL(AlarmActivating(Alarm*)),alarms,SLOT(AddEnabledAlarm(Alarm*)));
-connect(this,SIGNAL(AlarmDeactivating(Alarm*)),alarms,SLOT(DeleteEnabledAlarm(Alarm*)));
+    connect(this,SIGNAL(AlarmActivating(Alarm*)),alarms,SLOT(AddEnabledAlarm(Alarm*)));
+    connect(this,SIGNAL(AlarmDeactivating(Alarm*)),alarms,SLOT(DeleteEnabledAlarm(Alarm*)));
 }
 //=================================================================
 void Alarm::TagValueChanged(float newvalue)
@@ -308,7 +304,6 @@ void Alarms::NewConnection()
     //TO DO: send alarms
     UpdateAllAlarmsToOneClient(pClient);
 
-    // Qt 5 connect syntax
     connect(pClient, SIGNAL(disconnected()), this, SLOT(ClientDisconnected()));
     connect(pClient,SIGNAL(readyRead()),this,SLOT(ClientWrite()));
     //lastClient=pClient;
@@ -492,22 +487,18 @@ void Alarms::Kvitirovat2()
     {
         if( !(enabledAlarmList.at(0)->IsConfirmed()) )
         {
-
-        Kvitirovat(1);
-        qSort(enabledAlarmList.begin(),enabledAlarmList.end(),compare_alarms);
-        //enabledAlarmList.sort(compare_alarms);
-        emit EnabledAlarmsChanged(&enabledAlarmList, false);
-        UpdateAllAlarmsToAllClients();
+            Kvitirovat(1);
+            qSort(enabledAlarmList.begin(),enabledAlarmList.end(),compare_alarms);
+            //enabledAlarmList.sort(compare_alarms);
+            emit EnabledAlarmsChanged(&enabledAlarmList, false);
+            UpdateAllAlarmsToAllClients();
         }
     }
-
-
 }
 //==================================================================
 void Alarms::run()
 {
     bool isBlinking=true;
-
 
     while (isBlinking)
     {
@@ -519,10 +510,5 @@ void Alarms::run()
             if (alarm->IsActive() && !alarm->IsConfirmed()) isBlinking=true;
         }
         if (isBlinking) emit EnabledAlarmsChanged(&enabledAlarmList, true);
-
     }
-
-//isBlinking=false;
-
-
 }
