@@ -1,22 +1,5 @@
 #include "mainwindow.h"
-
 #include "ui_mainwindow.h"
-
-#include <QMessageBox>
-#include <QDateTime>
-#include <QFile>
-#include <QDir>
-#include <QNetworkInterface>
-#include <QCryptographicHash>
-#include <QRegExp>
-#include <QtScript/QScriptEngine>
-
-
-#include "logger.h"
-#include "alarm.h"
-#include "odbcdb.h"
-#include "configreader.h"
-#include "nodedataviewer.h"
 
 
 
@@ -24,17 +7,17 @@
 //Global vars
 //TO DO: переделать на синглтоны или создать объект типа ScadaServer - статический или синглтон
 //==================================================================================================
-const char *trend_path="d:\\MNU_SCADA\\trends\\";   //каталог для трендовых файлов
-const float min_float=-3.4028234663852886e+38;        //минимальное число float
-float empty_file[17280];
+//const char *trend_path="d:\\MNU_SCADA\\trends\\";   //каталог для трендовых файлов
+//const float min_float=-3.4028234663852886e+38;        //минимальное число float
+//float empty_file[17280];
 
-QHash<QString, CommonNode *> hashCommonNodes;
-QVector<CommonTrend *> vectCommonTrends;
-QVector<alarm_tag_struct> vectAlarmTags;
+//QHash<QString, CommonNode *> hashCommonNodes;
+//QVector<CommonTrend *> vectCommonTrends;
+//QVector<alarm_tag_struct> vectAlarmTags;
 
-//Подсистемы СКАДы
-Logger *logger;
-Alarms *alarms;
+
+
+
 
 //===================================================================================================
 bool MainWindow::CheckHash()
@@ -98,6 +81,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ss = ScadaServer::GetInstance();
+
     connect(ui->buttonClose,SIGNAL(clicked()),this,SLOT(close()));
 
     connect(ui->testButton,SIGNAL(clicked()),this,SLOT(pushTestButton()));
@@ -109,15 +95,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->buttonMessagesShow,SIGNAL(clicked()),SLOT(buttonMessagesShow_clicked()));
     connect(ui->listWidget,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(ViewNodeData(QListWidgetItem*)));
-
-
-    alarms=new Alarms();
-
-
-    for(int i=0;i<17280;i++)
-    {
-    empty_file[i]=min_float;
-    }
 
 
       // configuration  - ConfigReader class
@@ -155,11 +132,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
              ui->listWidget->addItem(node->FormattedNodeString());
 
-             hashCommonNodes.insert(node->m_nameObject,node);
+             ss->hashCommonNodes.insert(node->m_nameObject,node);
 
              //create Dir
-             QDir nodeDir(QString(trend_path)+"\\"+node->m_nameObject);
-             if (!nodeDir.exists()) nodeDir.mkdir(QString(trend_path)+"\\"+node->m_nameObject);
+             QDir nodeDir(QString(ss->trend_path)+"\\"+node->m_nameObject);
+             if (!nodeDir.exists()) nodeDir.mkdir(QString(ss->trend_path)+"\\"+node->m_nameObject);
 
              logger->AddLog("Added Node: "+node->m_nameObject+": " + node->m_IP_addr+":" + QString::number(node->m_port)+
                                    "(" + node->m_typeObject + ", tags=" + QString::number(node->m_srv.num_float_tags)+")",Qt::black);
@@ -173,10 +150,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
           while(configReader.ReadNextTrend(objectName,trendName,numInBuff))
           {
-              if (hashCommonNodes.contains(objectName))
+              if (ss->hashCommonNodes.contains(objectName))
               {
                   CommonTrend *trend = new CommonTrend(objectName,trendName,numInBuff);
-                  vectCommonTrends.append(trend);
+                  ss->vectCommonTrends.append(trend);
                   logger->AddLog("Added Trend: "+trend->m_objectName+"  " + trend->m_trendName+"  " + QString::number(trend->m_numInBuff),Qt::darkBlue);
               }
               else
@@ -208,12 +185,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
              if (alarmType=="connect")
              {
-                 if (hashCommonNodes.contains(alarmExpression))
+                 if (ss->hashCommonNodes.contains(alarmExpression))
                  {
                     //connect alarms yellow("warning") color use
                     alarmDescStruct.alarmTag=new FloatTag();
-                    alarms->AddAlarm("warning",OnValueChanged,alarmDescStruct.alarmTag,alarmComparison,alarmValue,alarmText, alarmDelay_s);
-                    vectAlarmTags.append(alarmDescStruct);
+                    ss->alarms->AddAlarm("warning",OnValueChanged,alarmDescStruct.alarmTag,alarmComparison,alarmValue,alarmText, alarmDelay_s);
+                    ss->vectAlarmTags.append(alarmDescStruct);
                  }
                  else
                  {
@@ -225,14 +202,14 @@ MainWindow::MainWindow(QWidget *parent) :
                   bool allMembersExist=true;
                   foreach(alarm_expr_member_struct alarmExprMember, alarmVectExprMembers)
                   {
-                     if (!hashCommonNodes.contains(alarmExprMember.objectName)) allMembersExist=false;
+                     if (!ss->hashCommonNodes.contains(alarmExprMember.objectName)) allMembersExist=false;
                   }
 
                   if (allMembersExist)
                   {
                       alarmDescStruct.alarmTag=new FloatTag();
-                      alarms->AddAlarm(alarmType,OnValueChanged,alarmDescStruct.alarmTag,alarmComparison,alarmValue,alarmText, alarmDelay_s);
-                      vectAlarmTags.append(alarmDescStruct);
+                      ss->alarms->AddAlarm(alarmType,OnValueChanged,alarmDescStruct.alarmTag,alarmComparison,alarmValue,alarmText, alarmDelay_s);
+                      ss->vectAlarmTags.append(alarmDescStruct);
                   }
                   else
                   {
@@ -271,14 +248,14 @@ MainWindow::MainWindow(QWidget *parent) :
                  bool allMembersExist=true;
                  foreach(virt_expr_member_struct virtTagExprMember, virtTagVectExprMembers)
                  {
-                    if (!hashCommonNodes.contains(virtTagExprMember.objectName)) allMembersExist=false;
+                    if (!ss->hashCommonNodes.contains(virtTagExprMember.objectName)) allMembersExist=false;
                  }
 
                  if (allMembersExist)
                  {
                      VirtualNode *vn=0;
-                     if (hashCommonNodes.contains(objectName))
-                     vn=dynamic_cast<VirtualNode *>(hashCommonNodes[objectName]);
+                     if (ss->hashCommonNodes.contains(objectName))
+                     vn=dynamic_cast<VirtualNode *>(ss->hashCommonNodes[objectName]);
                      if (vn!=0)
                      {
                         vn->vectVirtTags.append(virtTagDescStruct);
@@ -322,14 +299,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&timer5s_checkConnectAndSendToClients,SIGNAL(timeout()),this,SLOT(TimerEvent5s()));
     timer5s_checkConnectAndSendToClients.start(5000);
-    trendWriterThread.start();
+
+    trendWriterThread = new TrendWriterThread();
+    trendWriterThread->start();
 
 
      connect(&timer1s_setAlarmTags,SIGNAL(timeout()),this,SLOT(TimerEvent1s_setAlarmsTags()));
      timer1s_setAlarmTags.start(1000);
 
-     connect(ui->button_Confirm5Alarms, SIGNAL(clicked()),alarms,SLOT(Kvitirovat2()));
-     connect(alarms,SIGNAL(EnabledAlarmsChanged(QList<Alarm*>*,bool)),SLOT(alarmsChanged(QList<Alarm*>*,bool)));
+     connect(ui->button_Confirm5Alarms, SIGNAL(clicked()),ss->alarms,SLOT(Kvitirovat2()));
+     connect(ss->alarms,SIGNAL(EnabledAlarmsChanged(QList<Alarm*>*,bool)),SLOT(alarmsChanged(QList<Alarm*>*,bool)));
 }
 //=========================================================================================================
 void MainWindow::alarmsChanged(QList < Alarm* > *pEnabledAlarmList, bool onlyColorChange)
@@ -419,11 +398,11 @@ void MainWindow::TimerEvent1s_setAlarmsTags()
 
     static QScriptEngine alarmScriptEngine;
 
-    foreach(alarm_tag_struct alarmDescStruct, vectAlarmTags)
+    foreach(alarm_tag_struct alarmDescStruct, ss->vectAlarmTags)
     {
         if (alarmDescStruct.alarmType=="connect")
         {
-            alarmDescStruct.alarmTag->SetValueQuality(hashCommonNodes[alarmDescStruct.alarmExpression]->m_isConnected,true);
+            alarmDescStruct.alarmTag->SetValueQuality(ss->hashCommonNodes[alarmDescStruct.alarmExpression]->m_isConnected,true);
            // logger->AddLog("Changed Alarm: "+alarmDescStruct.alarmType+"  " + alarmDescStruct.alarmExpression+"  val="+QString::number(hashCommonNodes[alarmDescStruct.alarmExpression]->m_isConnected),Qt::black);
         }
         else
@@ -437,7 +416,7 @@ void MainWindow::TimerEvent1s_setAlarmsTags()
 
             foreach(alarm_expr_member_struct alarmExprMember, alarmDescStruct.vectAlarmExprMembers)
             {
-                  tmp_TagQuality&=hashCommonNodes[alarmExprMember.objectName]->m_isReaded;
+                  tmp_TagQuality&=ss->hashCommonNodes[alarmExprMember.objectName]->m_isReaded;
             }
 
             if (tmp_TagQuality)
@@ -445,7 +424,7 @@ void MainWindow::TimerEvent1s_setAlarmsTags()
                 foreach(alarm_expr_member_struct alarmExprMember, alarmDescStruct.vectAlarmExprMembers)
                 {
                     tmp_alarmExpression.replace(alarmExprMember.objectName+"["+QString::number(alarmExprMember.numInBuff)+"]",
-                                                            QString::number(hashCommonNodes[alarmExprMember.objectName]->m_srv.buff[alarmExprMember.numInBuff]));
+                                                            QString::number(ss->hashCommonNodes[alarmExprMember.objectName]->m_srv.buff[alarmExprMember.numInBuff]));
 
 
                 }
@@ -472,7 +451,7 @@ void MainWindow::TimerEvent1s_setAlarmsTags()
 void MainWindow::TimerEvent5s()
 {
 
-    foreach(CommonNode* node,hashCommonNodes)
+    foreach(CommonNode* node,ss->hashCommonNodes)
     {
        if (node->m_isReaded &&
            !node->m_srv.m_pServerSocket->isListening())
@@ -512,30 +491,32 @@ MainWindow::~MainWindow()
 
     emit textSave2LogFile(-1, "","program closed");
 
+    //останавливаем таймеры алармов
+
     timer5s_checkConnectAndSendToClients.stop();
     timer1s_setAlarmTags.stop();
 
-    foreach(CommonNode* node,hashCommonNodes)
+    //останавливаем поток записи трендов
+    delete trendWriterThread;
+
+    //останавливаем потоки опроса узлов
+    foreach(CommonNode* node,ss->hashCommonNodes)
     {
         delete node;
     }
 
-    foreach(alarm_tag_struct alarmTg, vectAlarmTags)
-    {
-        delete alarmTg.alarmTag;
-    }
+    // и далее все удаляем
+    ss->hashCommonNodes.clear();
 
-    foreach(Alarm* al,alarms->allAlarmsList)
-    {
-        delete al;
-    }
-
-    delete alarms;
-
-    foreach(CommonTrend* trend,vectCommonTrends)
+    foreach(CommonTrend* trend,ss->vectCommonTrends)
     {
         delete trend;
     }
+
+    ss->vectCommonTrends.clear();
+
+
+
 
     delete ui;
 
@@ -544,21 +525,21 @@ MainWindow::~MainWindow()
 void MainWindow::TextChanged(int iUzel, QString objectName, QString newText)
 {
 
-    hashCommonNodes[objectName]->m_text_client=newText;
+    ss->hashCommonNodes[objectName]->m_text_client=newText;
 
-    ui->listWidget->item(iUzel)->setText(hashCommonNodes[objectName]->FormattedNodeString());
+    ui->listWidget->item(iUzel)->setText(ss->hashCommonNodes[objectName]->FormattedNodeString());
 
-    logger->AddLog("Network: " + hashCommonNodes[objectName]->m_nameObject+":" + hashCommonNodes[objectName]->m_IP_addr+":" +
-                QString::number(hashCommonNodes[objectName]->m_port)+
-                "(" + hashCommonNodes[objectName]->m_typeObject  + ") === " + hashCommonNodes[objectName]->m_text_client,Qt::darkGreen);
+    logger->AddLog("Network: " + ss->hashCommonNodes[objectName]->m_nameObject+":" + ss->hashCommonNodes[objectName]->m_IP_addr+":" +
+                QString::number(ss->hashCommonNodes[objectName]->m_port)+
+                "(" + ss->hashCommonNodes[objectName]->m_typeObject  + ") === " + ss->hashCommonNodes[objectName]->m_text_client,Qt::darkGreen);
 
 }
 //========================================================================================
 void MainWindow::TextChanged_repl(int iUzel, QString objectName, QString newText)
 {
 
-    hashCommonNodes[objectName]->m_text_repl=newText;
-    ui->listWidget->item(iUzel)->setText(hashCommonNodes[objectName]->FormattedNodeString());
+    ss->hashCommonNodes[objectName]->m_text_repl=newText;
+    ui->listWidget->item(iUzel)->setText(ss->hashCommonNodes[objectName]->FormattedNodeString());
 
 }
 //========================================================================================
@@ -595,8 +576,8 @@ void MainWindow::TextSave2LogFile(int iUzel, QString objectName, QString newText
             {
                 QString tmp;
                 tmp.sprintf("%s --- %s(%s) %s\n",QDateTime::currentDateTime().toString("hh:mm:ss.zzz").toStdString().c_str(),
-                             hashCommonNodes[objectName]->m_nameObject.toStdString().c_str(),
-                             hashCommonNodes[objectName]->m_IP_addr.toStdString().c_str(),
+                             ss->hashCommonNodes[objectName]->m_nameObject.toStdString().c_str(),
+                             ss->hashCommonNodes[objectName]->m_IP_addr.toStdString().c_str(),
                              newText.toStdString().c_str());
                 netlog.write( tmp.toStdString().c_str());
                 netlog.close();
@@ -604,11 +585,11 @@ void MainWindow::TextSave2LogFile(int iUzel, QString objectName, QString newText
     }
 }
 //========================================================================================
-void FuncFileWriter(CommonTrend *this_trend_info, char *str_date, uint time_pos)
+void TrendWriterThread::FuncFileWriter(CommonTrend *this_trend_info, char *str_date, uint time_pos)
 {
     QString filename;
 
-    filename.sprintf("%s%s\\%s_%s.trn",trend_path,this_trend_info->m_objectName.toStdString().c_str(),this_trend_info->m_trendName.toStdString().c_str(),str_date);
+    filename.sprintf("%s%s\\%s_%s.trn",ss->trend_path,this_trend_info->m_objectName.toStdString().c_str(),this_trend_info->m_trendName.toStdString().c_str(),str_date);
 
     QFile trend(filename);
 
@@ -617,9 +598,9 @@ void FuncFileWriter(CommonTrend *this_trend_info, char *str_date, uint time_pos)
 
             if (trend.open(QIODevice::ReadWrite))
             {
-                trend.write((char *)&empty_file[0],69120);
+                trend.write((char *)ss->empty_file,69120);
                 trend.seek(time_pos*4);//, CFile::begin);
-                trend.write((char *)&(hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
+                trend.write((char *)&(ss->hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
                 trend.close();
             }
         }
@@ -627,14 +608,18 @@ void FuncFileWriter(CommonTrend *this_trend_info, char *str_date, uint time_pos)
         {
             trend.open(QIODevice::ReadWrite);
             trend.seek(time_pos*4);//, CFile::begin);
-            trend.write((char *)&(hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
+            trend.write((char *)&(ss->hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
             trend.close();
         }
 
     return;
 }
 //=========================================================================================
-
+TrendWriterThread::TrendWriterThread()
+{
+    ss=ScadaServer::GetInstance();
+}
+//=========================================================================================
 void TrendWriterThread::run()
 {
 
@@ -653,10 +638,10 @@ void TrendWriterThread::run()
             int time22=(currDateTime.time().hour()*60*60+currDateTime.time().minute()*60+currDateTime.time().second())/5;
             sprintf(buf_date,"%.2u_%.2u_%.4u",currDateTime.date().day(),currDateTime.date().month(),currDateTime.date().year());
 
-            foreach (CommonTrend *tr,vectCommonTrends)
+            foreach (CommonTrend *tr,ss->vectCommonTrends)
             {
 
-                if (hashCommonNodes[tr->m_objectName]->m_isReaded)
+                if (ss->hashCommonNodes.contains(tr->m_objectName) && ss->hashCommonNodes[tr->m_objectName]->m_isReaded)
                 {
                     FuncFileWriter(tr,buf_date,time22);
                 }
@@ -702,9 +687,9 @@ void MainWindow::ViewNodeData(QListWidgetItem *item)
     QString objName=item->text();
     objName=objName.left(objName.indexOf(' '));
 
-    if (hashCommonNodes.contains(objName))
+    if (ss->hashCommonNodes.contains(objName))
     {
-        NodeDataViewer *ndw=new NodeDataViewer(hashCommonNodes[objName], &vectCommonTrends ,this);
+        NodeDataViewer *ndw=new NodeDataViewer(ss->hashCommonNodes[objName], &ss->vectCommonTrends ,this);
         ndw->show();
     }
 }

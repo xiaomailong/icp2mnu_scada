@@ -4,10 +4,24 @@
 
 
 #include <QMainWindow>
+#include <QMessageBox>
+#include <QDateTime>
+#include <QFile>
+#include <QDir>
+#include <QNetworkInterface>
+#include <QCryptographicHash>
+#include <QRegExp>
+#include <QtScript/QScriptEngine>
 #include <QTimer>
 #include <QListWidgetItem>
+
+#include "logger.h"
 #include "alarm.h"
 #include "autostopthread.h"
+#include "scadaserver.h"
+#include "odbcdb.h"
+#include "configreader.h"
+#include "nodedataviewer.h"
 
 
 namespace Ui {
@@ -17,7 +31,11 @@ class MainWindow;
 class TrendWriterThread: public AutoStopThread
 {
       Q_OBJECT
+private:
+    ScadaServer *ss;
 public:
+    TrendWriterThread();
+    void FuncFileWriter(CommonTrend *this_trend_info, char *str_date, uint time_pos);
     void run();
 
 };
@@ -38,7 +56,9 @@ private:
     Ui::MainWindow *ui;
     QTimer timer5s_checkConnectAndSendToClients;
     QTimer timer1s_setAlarmTags;
-    TrendWriterThread trendWriterThread;
+    TrendWriterThread *trendWriterThread;
+    Logger *logger;
+    ScadaServer *ss;
 
 
 public slots:

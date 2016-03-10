@@ -1,14 +1,15 @@
 #include "nodes.h"
 
 
-extern const char *trend_path;
-extern const float min_float=-3.4028234663852886e+38;
-extern float empty_file[17280];
+//extern const char *trend_path;
+//extern const float min_float=-3.4028234663852886e+38;
+//extern float empty_file[17280];
 
-extern QVector<CommonTrend *> vectCommonTrends;
-extern QHash<QString, CommonNode *> hashCommonNodes;     //for using in Virtual Controllers (data values)
+//extern QVector<CommonTrend *> vectCommonTrends;
+//extern QHash<QString, CommonNode *> hashCommonNodes;     //for using in Virtual Controllers (data values)
+
+//allocate memory for static member
 uint CommonNode::nodes_counter=0;
-
 
 
 //сравнение для сортировки по убыванию длины имени объекта, лямбду не принимает
@@ -24,6 +25,7 @@ CommonNode::CommonNode()
     m_text_repl="";
     m_isConnected=false;
     m_isReaded=false;
+    ss = ScadaServer::GetInstance();
 }
 //================================================================================
 CommonNode::~CommonNode()
@@ -244,7 +246,8 @@ MnuScadaNode::~MnuScadaNode()
         socket->waitForDisconnected(5000);
     }
     */
-    timerConnectLoop.stop();
+
+    timerConnectLoop.stop(); // - error QObject::killTimers: timers cannot be stopped from another thread
     delete socket;
 
 }
@@ -502,10 +505,10 @@ void MnuScadaNode::run()
 
         for (int cycles_cnt=0;cycles_cnt<2;++cycles_cnt)
         {
-            for(uint i=0;i<vectCommonTrends.size();i++)
+            foreach(CommonTrend *trend, ss->vectCommonTrends)
             {
 
-                if (this->m_nameObject==vectCommonTrends[i]->m_objectName)
+                if (this->m_nameObject==trend->m_objectName)
                 {
                         repl_socket.connectToHost(m_IP_addr, m_port_repl);
                         if (repl_socket.waitForConnected(5000))  //true if connected
@@ -538,8 +541,8 @@ void MnuScadaNode::run()
                             {
                                 QString filename;
 
-                                filename.sprintf("%s%s\\%s_%.2u_%.2u_%.4u.trn",trend_path,vectCommonTrends[i]->m_objectName.toStdString().c_str(),
-                                                 vectCommonTrends[i]->m_trendName.toStdString().c_str(),rrDay_st,rrMonth_st,rrYear_st);
+                                filename.sprintf("%s%s\\%s_%.2u_%.2u_%.4u.trn",ss->trend_path,trend->m_objectName.toStdString().c_str(),
+                                                 trend->m_trendName.toStdString().c_str(),rrDay_st,rrMonth_st,rrYear_st);
 
                                 QFile trend_file(filename);
 
@@ -547,7 +550,7 @@ void MnuScadaNode::run()
                                 {
                                     if (trend_file.open(QIODevice::ReadWrite))
                                     {
-                                        trend_file.write((char *)&empty_file[0],69120);
+                                        trend_file.write((char *)ss->empty_file,69120);
                                         trend_file.close();
                                         //trend_file.waitForBytesWritten(5000);
                                     }
@@ -566,9 +569,9 @@ void MnuScadaNode::run()
                                 int pos_nach=0,pos_kon=0;
                                 for (int j=0;j<Razmer_faila;j++)
                                 {
-                                    if (!nachalo_naideno && buff_file[j]==min_float) {nachalo_naideno=true;pos_nach=j;}
+                                    if (!nachalo_naideno && buff_file[j]==ss->min_float) {nachalo_naideno=true;pos_nach=j;}
 
-                                    if (  (nachalo_naideno && buff_file[j]!=min_float) || (nachalo_naideno && j==Razmer_faila-1)
+                                    if (  (nachalo_naideno && buff_file[j]!=ss->min_float) || (nachalo_naideno && j==Razmer_faila-1)
                                             || (nachalo_naideno && j-pos_nach>200) )
                                     {
                                         struct zapros
@@ -579,13 +582,13 @@ void MnuScadaNode::run()
                                             int Count;
                                         } zapr;
 
-                                        if (nachalo_naideno && buff_file[j]!=min_float) {aligner=0;}
+                                        if (nachalo_naideno && buff_file[j]!=ss->min_float) {aligner=0;}
                                         if ((nachalo_naideno && j==Razmer_faila-1) || (nachalo_naideno && j-pos_nach>200)) {aligner=1;}
 
 
                                         pos_kon=j;
                                         nachalo_naideno=false;
-                                        strcpy(zapr.FileName,vectCommonTrends[i]->m_trendName.toStdString().c_str());
+                                        strcpy(zapr.FileName,trend->m_trendName.toStdString().c_str());
                                         zapr.Year=rrYear_st;
                                         zapr.Month=rrMonth_st;
                                         zapr.Day=rrDay_st;
@@ -665,7 +668,7 @@ VirtualNode::VirtualNode(int this_number,QString objectName,QString objectType,
 //=========================================================================================
 VirtualNode::~VirtualNode()
 {
-    timerCalculateVariables.stop();
+    timerCalculateVariables.stop();  //- error QObject::killTimers: timers cannot be stopped from another thread
 }
 //=========================================================================================
 void VirtualNode::TimerCalculateVariablesEvent()
@@ -680,7 +683,7 @@ void VirtualNode::TimerCalculateVariablesEvent()
         {
             if (exprMember.objectName!=this->m_nameObject) // ход конем чтоб можно было использовать свои же тэги, в противном случае он будет ждать себя же
             {
-                if (!hashCommonNodes[exprMember.objectName]->m_isReaded) allControllersConnected=false;
+                if (!ss->hashCommonNodes[exprMember.objectName]->m_isReaded) allControllersConnected=false;
             }
         }
     }
@@ -701,7 +704,7 @@ void VirtualNode::TimerCalculateVariablesEvent()
 
 
                 tmp_virtTagExpression.replace(exprMember.objectName+"["+QString::number(exprMember.numInBuff)+"]",
-                                              QString::number(hashCommonNodes[exprMember.objectName]->m_srv.buff[exprMember.numInBuff]));
+                                              QString::number(ss->hashCommonNodes[exprMember.objectName]->m_srv.buff[exprMember.numInBuff]));
             }
 
             tmp_TagValue=virtControllerScriptEngine.evaluate(tmp_virtTagExpression).toNumber();

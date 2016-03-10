@@ -10,7 +10,12 @@
 #include "autostopthread.h"
 #include "srvretranslater.h"
 #include "logger.h"
+#include "scadaserver.h"
+
 #include "./src_libmodbus/modbus.h"
+
+//class ScadaServer;
+
 //==============================================================
 struct virt_expr_member_struct
 {
@@ -87,6 +92,8 @@ public:
     unsigned int m_port_local;
 
     QString FormattedNodeString();
+    ScadaServer *ss;
+
 
 signals:
     void textchange(int iUzel,QString objectName, QString newText);

@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     logger.cpp \
     odbcdb.cpp \
     configreader.cpp \
-    nodedataviewer.cpp
+    nodedataviewer.cpp \
+    scadaserver.cpp
 
 HEADERS  += mainwindow.h \
     autostopthread.h \
@@ -36,7 +37,8 @@ HEADERS  += mainwindow.h \
     logger.h \
     odbcdb.h \
     configreader.h \
-    nodedataviewer.h
+    nodedataviewer.h \
+    scadaserver.h
 
 FORMS    += mainwindow.ui \
     logger.ui \

@@ -43,9 +43,9 @@ class Logger: public QObject
 {
     Q_OBJECT
 private:
-    Logger(){}
+    Logger();
     ~Logger();
-private:
+
     static Logger* theSingleInstanceLogger;
     static LoggerWindow *theSingleInstanceLoggerWindow;
 //    static list<Message> messageList;

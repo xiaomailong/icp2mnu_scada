@@ -41,17 +41,22 @@ ui->listWidget->item(ui->listWidget->count()-1)->setForeground(color);
 
 }
 //=====================================================================
+Logger::Logger()
+{
+}
 //=====================================================================
-Logger::~Logger(){delete theSingleInstanceLogger;
-               delete theSingleInstanceLoggerWindow;}
-
+Logger::~Logger()
+{
+    delete theSingleInstanceLogger;
+    delete theSingleInstanceLoggerWindow;
+}
 //=====================================================================
 Logger* Logger::Instance()
 {
-mutex.lock();
-if(theSingleInstanceLogger==NULL) theSingleInstanceLogger=new Logger;
-mutex.unlock();
-return theSingleInstanceLogger;
+    mutex.lock();
+    if(theSingleInstanceLogger==NULL) theSingleInstanceLogger=new Logger;
+    mutex.unlock();
+    return theSingleInstanceLogger;
 }
 //=====================================================================
 LoggerWindow* Logger::InstanceWindow()
