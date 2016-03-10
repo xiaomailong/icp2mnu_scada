@@ -341,7 +341,7 @@ void Alarms::ClientWrite()
     while (pClient->bytesAvailable() >= sizeof(alarm_message_struct))
     {
         pClient->read((char *)&alarm_message,sizeof(alarm_message_struct));
-        //найдем аларм по ИД и комитим его:
+        //найдем аларм по ИД и подтверждаем его:
         foreach(Alarm *alarm, enabledAlarmList)
         {
             if (alarm->ID==alarm_message.ID)
