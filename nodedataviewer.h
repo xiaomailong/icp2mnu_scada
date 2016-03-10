@@ -19,6 +19,8 @@ class NodeDataViewer : public QDialog
 public:
     explicit NodeDataViewer(CommonNode *node, QVector<CommonTrend *> *vectTrends, QWidget *parent = 0);
     ~NodeDataViewer();
+private:
+    Ui::NodeDataViewer *ui;
     QTimer m_timer1s;
     CommonNode *m_node;
     void closeEvent(QCloseEvent *event);
@@ -28,8 +30,7 @@ public:
 public slots:
     void Timer1sEvent();
 
-private:
-    Ui::NodeDataViewer *ui;
+
 };
 
 #endif // NODEDATAVIEWER_H

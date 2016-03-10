@@ -91,7 +91,7 @@ bool ConfigReader::ReadNextNode(QString &objectName,QString &objectType,QString 
         if (node_conf_line[0]=='[') return false;   //достигнута следующая секция
 
         QRegExp regExp("^(\\w+)\\s+(modbus|mnu_scada|virtual)\\s+(\\d+\\.\\d+\\.\\d+\\.\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)");  //   \\s?\\n?$");
-        if(regExp.indexIn(node_conf_line)!=-1)  //неподходящие строки игнорируем
+        if(regExp.indexIn(node_conf_line)!=-1)  //неподходящие строки игнорируем и выводим в лог
         {
             //for(int i=1;i<9;++i)
             //logger->AddLog("Node File:      " + regExp.cap(i),Qt::black);
@@ -144,7 +144,7 @@ bool ConfigReader::ReadNextTrend(QString &objectName, QString &trendName,uint &n
         if (node_conf_line[0]=='[') return false;   //достигнута следующая секция
 
         QRegExp regExp("^(\\w+)\\s+(\\w+)\\s+(\\d+)");  //   \\s?\\n?$");
-        if(regExp.indexIn(node_conf_line)!=-1)  //неподходящие строки игнорируем
+        if(regExp.indexIn(node_conf_line)!=-1)  //неподходящие строки игнорируем и выводим в лог
         {
             //for(int i=1;i<9;++i)
             //logger->AddLog("Node File:      " + regExp.cap(i),Qt::black);
@@ -200,7 +200,7 @@ bool ConfigReader::ReadNextAlarm(QString &alarmType, QString &alarmExpression, Q
         if (node_conf_line[0]=='[') return false;   //достигнута следующая секция
 
         QRegExp regExp("^(information|warning|critical|connect)\\s+([\\w\\d\\[\\]+-\\/*\\(\\)]+)([<>=]?)([+-]?\\d*\\.?\\d*)\\s+(\\d*)\\s+(\\S.+[^\\n])\\n*$");
-        if(regExp.indexIn(node_conf_line)!=-1)  //неподходящие строки игнорируем
+        if(regExp.indexIn(node_conf_line)!=-1)  //неподходящие строки игнорируем и выводим в лог
         {
             alarmType=regExp.cap(1);
             if (alarmType=="connect")

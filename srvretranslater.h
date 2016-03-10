@@ -10,26 +10,22 @@ class SrvReTranslater : public QObject
 {
     Q_OBJECT
 
-    public:
-        SrvReTranslater();
-        virtual ~SrvReTranslater();
+public:
+    SrvReTranslater();
+    virtual ~SrvReTranslater();
     float buff[100];
     unsigned int num_float_tags; //1 float tag = 2 modbus registers
+    QTcpServer* m_pServerSocket;
+    QList<QTcpSocket*> m_pClientSocketList;
+    //QTcpSocket* lastClient;
 
-
-
-    public slots:
+public slots:
         // Slot to handle disconnected client
         void ClientDisconnected();
 
-    private slots:
+private slots:
         // New client connection
         void NewConnection();
-
-    public:
-        QTcpServer* m_pServerSocket;
-        QList<QTcpSocket*> m_pClientSocketList;
-        //QTcpSocket* lastClient;
 };
 
 

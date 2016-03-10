@@ -24,21 +24,12 @@
 #include "nodedataviewer.h"
 
 
+
 namespace Ui {
 class MainWindow;
 }
 //=================================================================================
-class TrendWriterThread: public AutoStopThread
-{
-      Q_OBJECT
-private:
-    ScadaServer *ss;
-public:
-    TrendWriterThread();
-    void FuncFileWriter(CommonTrend *this_trend_info, char *str_date, uint time_pos);
-    void run();
 
-};
 //=================================================================================
 class MainWindow : public QMainWindow
 {
@@ -56,7 +47,6 @@ private:
     Ui::MainWindow *ui;
     QTimer timer5s_checkConnectAndSendToClients;
     QTimer timer1s_setAlarmTags;
-    TrendWriterThread *trendWriterThread;
     Logger *logger;
     ScadaServer *ss;
 

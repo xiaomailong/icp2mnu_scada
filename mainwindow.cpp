@@ -2,78 +2,6 @@
 #include "ui_mainwindow.h"
 
 
-
-//==================================================================================================
-//Global vars
-//TO DO: переделать на синглтоны или создать объект типа ScadaServer - статический или синглтон
-//==================================================================================================
-//const char *trend_path="d:\\MNU_SCADA\\trends\\";   //каталог для трендовых файлов
-//const float min_float=-3.4028234663852886e+38;        //минимальное число float
-//float empty_file[17280];
-
-//QHash<QString, CommonNode *> hashCommonNodes;
-//QVector<CommonTrend *> vectCommonTrends;
-//QVector<alarm_tag_struct> vectAlarmTags;
-
-
-
-
-
-//===================================================================================================
-bool MainWindow::CheckHash()
-{
-
-
-QString calculated_hash_result;
-QString file_hash_result;
-
-    //test - found network interfaces
-    QList<QNetworkInterface> ni_list=QNetworkInterface::allInterfaces();
-    foreach(QNetworkInterface ni, ni_list)
-    {
-    //    logger->AddLog("Interface MAC: "+ni.hardwareAddress(),Qt::black);
-    //    logger->AddLog("Interface name: "+ni.humanReadableName(),Qt::black);
-
-        QList<QNetworkAddressEntry> nae_list=ni.addressEntries();
-        foreach(QNetworkAddressEntry nae,nae_list)
-        {
-             //logger->AddLog("Interface  IP: "+nae.ip().toString(),Qt::black);
-
-             if (nae.ip().toString().left(4)=="172.")
-             {
-                 QByteArray ba((nae.ip().toString()+ " " + ni.hardwareAddress()).toStdString().c_str());//,ni.hardwareAddress().toStdString().length());
-                 QByteArray hash_result=QCryptographicHash::hash(ba,QCryptographicHash::Sha1);
-
-                 calculated_hash_result=hash_result.toHex();
-
-
-       //          logger->AddLog(QString("Interface  IP+MAC: ")+(nae.ip().toString()+ " " + ni.hardwareAddress()).toStdString().c_str(),Qt::black);
-       //          logger->AddLog("Interface  MAC+IP hash: "+calculated_hash_result,Qt::black);
-             }
-        }
-
-
-      //  logger->AddLog("----------------- ",Qt::black);
-
-    }
-
-    QFile file(qApp->applicationDirPath()+"\\main.hash");
-    //QFile file("E:\\ALL_PROJECTS\\Qt5\\icp2mnu_scada_build\\release\\main.hash");
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
-
-    file_hash_result=file.readLine();
-
-    //logger->AddLog(QString("File Hash: ")+file_hash_result,Qt::black);
-    file.close();
-
-    //end test code
-
-    if (calculated_hash_result==file_hash_result) return true;
-
-
-
-    return false;
-}
 //============================================================================================
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -134,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
              ss->hashCommonNodes.insert(node->m_nameObject,node);
 
-             //create Dir
+             //create Dirs
              QDir nodeDir(QString(ss->trend_path)+"\\"+node->m_nameObject);
              if (!nodeDir.exists()) nodeDir.mkdir(QString(ss->trend_path)+"\\"+node->m_nameObject);
 
@@ -300,14 +228,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&timer5s_checkConnectAndSendToClients,SIGNAL(timeout()),this,SLOT(TimerEvent5s()));
     timer5s_checkConnectAndSendToClients.start(5000);
 
-    trendWriterThread = new TrendWriterThread();
-    trendWriterThread->start();
+    ss->trendWriterThread = new TrendWriter();
+    ss->trendWriterThread->start();
 
 
      connect(&timer1s_setAlarmTags,SIGNAL(timeout()),this,SLOT(TimerEvent1s_setAlarmsTags()));
      timer1s_setAlarmTags.start(1000);
 
-     connect(ui->button_Confirm5Alarms, SIGNAL(clicked()),ss->alarms,SLOT(Kvitirovat2()));
+     connect(ui->button_Confirm5Alarms, SIGNAL(clicked()),ss->alarms,SLOT(AcknowledgeOneAlarm()));
      connect(ss->alarms,SIGNAL(EnabledAlarmsChanged(QList<Alarm*>*,bool)),SLOT(alarmsChanged(QList<Alarm*>*,bool)));
 }
 //=========================================================================================================
@@ -465,7 +393,6 @@ void MainWindow::TimerEvent5s()
            for(int j=0;j<node->m_srv.m_pClientSocketList.size();j++)
            {
                node->m_srv.m_pClientSocketList.at(j)->write((char *)node->m_srv.buff,node->m_srv.num_float_tags*4);
-
            }
        }
 
@@ -497,7 +424,7 @@ MainWindow::~MainWindow()
     timer1s_setAlarmTags.stop();
 
     //останавливаем поток записи трендов
-    delete trendWriterThread;
+    delete ss->trendWriterThread;
 
     //останавливаем потоки опроса узлов
     foreach(CommonNode* node,ss->hashCommonNodes)
@@ -584,74 +511,7 @@ void MainWindow::TextSave2LogFile(int iUzel, QString objectName, QString newText
             }
     }
 }
-//========================================================================================
-void TrendWriterThread::FuncFileWriter(CommonTrend *this_trend_info, char *str_date, uint time_pos)
-{
-    QString filename;
 
-    filename.sprintf("%s%s\\%s_%s.trn",ss->trend_path,this_trend_info->m_objectName.toStdString().c_str(),this_trend_info->m_trendName.toStdString().c_str(),str_date);
-
-    QFile trend(filename);
-
-    if (!trend.exists())  //Open(filename,CFile::modeWrite|CFile::modeNoTruncate|CFile::shareDenyNone,NULL))
-        {
-
-            if (trend.open(QIODevice::ReadWrite))
-            {
-                trend.write((char *)ss->empty_file,69120);
-                trend.seek(time_pos*4);//, CFile::begin);
-                trend.write((char *)&(ss->hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
-                trend.close();
-            }
-        }
-        else
-        {
-            trend.open(QIODevice::ReadWrite);
-            trend.seek(time_pos*4);//, CFile::begin);
-            trend.write((char *)&(ss->hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
-            trend.close();
-        }
-
-    return;
-}
-//=========================================================================================
-TrendWriterThread::TrendWriterThread()
-{
-    ss=ScadaServer::GetInstance();
-}
-//=========================================================================================
-void TrendWriterThread::run()
-{
-
-    int itime,iprevtime=100;
-
-    for(;;)
-    {
-        Sleep(200);
-
-        QDateTime currDateTime=QDateTime::currentDateTime();
-
-        itime=currDateTime.time().second() / 5;
-        if (itime!=iprevtime)
-        {
-            char buf_date[20];
-            int time22=(currDateTime.time().hour()*60*60+currDateTime.time().minute()*60+currDateTime.time().second())/5;
-            sprintf(buf_date,"%.2u_%.2u_%.4u",currDateTime.date().day(),currDateTime.date().month(),currDateTime.date().year());
-
-            foreach (CommonTrend *tr,ss->vectCommonTrends)
-            {
-
-                if (ss->hashCommonNodes.contains(tr->m_objectName) && ss->hashCommonNodes[tr->m_objectName]->m_isReaded)
-                {
-                    FuncFileWriter(tr,buf_date,time22);
-                }
-            }
-        }
-        iprevtime=itime;
-        if (CheckThreadStop()) return;
-    }
-
-}
 //=========================================================================================
 void MainWindow::pushTestButton()
 {
@@ -679,6 +539,61 @@ void MainWindow::pushTestButton()
     }
     first_call=false;
 
+}
+//===================================================================================================
+bool MainWindow::CheckHash()
+{
+
+
+QString calculated_hash_result;
+QString file_hash_result;
+
+    //test - found network interfaces
+    QList<QNetworkInterface> ni_list=QNetworkInterface::allInterfaces();
+    foreach(QNetworkInterface ni, ni_list)
+    {
+    //    logger->AddLog("Interface MAC: "+ni.hardwareAddress(),Qt::black);
+    //    logger->AddLog("Interface name: "+ni.humanReadableName(),Qt::black);
+
+        QList<QNetworkAddressEntry> nae_list=ni.addressEntries();
+        foreach(QNetworkAddressEntry nae,nae_list)
+        {
+             //logger->AddLog("Interface  IP: "+nae.ip().toString(),Qt::black);
+
+             if (nae.ip().toString().left(4)=="172.")
+             {
+                 QByteArray ba((nae.ip().toString()+ " " + ni.hardwareAddress()).toStdString().c_str());//,ni.hardwareAddress().toStdString().length());
+                 QByteArray hash_result=QCryptographicHash::hash(ba,QCryptographicHash::Sha1);
+
+                 calculated_hash_result=hash_result.toHex();
+
+
+       //          logger->AddLog(QString("Interface  IP+MAC: ")+(nae.ip().toString()+ " " + ni.hardwareAddress()).toStdString().c_str(),Qt::black);
+       //          logger->AddLog("Interface  MAC+IP hash: "+calculated_hash_result,Qt::black);
+             }
+        }
+
+
+      //  logger->AddLog("----------------- ",Qt::black);
+
+    }
+
+    QFile file(qApp->applicationDirPath()+"\\main.hash");
+    //QFile file("E:\\ALL_PROJECTS\\Qt5\\icp2mnu_scada_build\\release\\main.hash");
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+
+    file_hash_result=file.readLine();
+
+    //logger->AddLog(QString("File Hash: ")+file_hash_result,Qt::black);
+    file.close();
+
+    //end test code
+
+    if (calculated_hash_result==file_hash_result) return true;
+
+
+
+    return false;
 }
 
 //=========================================================================================

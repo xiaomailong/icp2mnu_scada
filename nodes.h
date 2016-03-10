@@ -14,13 +14,13 @@
 
 #include "./src_libmodbus/modbus.h"
 
-//class ScadaServer;
+class ScadaServer;
 
 //==============================================================
 struct virt_expr_member_struct
 {
-QString objectName;
-uint numInBuff;
+    QString objectName;
+    uint numInBuff;
 };
 
 //сравнение для сортировки по убыванию длины имени объекта, лямбду не принимает
@@ -28,9 +28,9 @@ bool operator<(const virt_expr_member_struct &a, const virt_expr_member_struct &
 
 struct virt_tag_struct
 {
-uint numInBuff;
-QString virtTagExpression;
-QVector<virt_expr_member_struct> vectVirtTagExprMembers;
+    uint numInBuff;
+    QString virtTagExpression;
+    QVector<virt_expr_member_struct> vectVirtTagExprMembers;
 };
 
 //==============================================================
@@ -68,8 +68,6 @@ public:
                                   uint modbus_start_address,
                                   uint num_float_tags);
 
-    static uint nodes_counter;
-
     QString m_IP_addr;
     unsigned int m_port;
     unsigned int m_port_repl;
@@ -78,22 +76,19 @@ public:
 
     QString m_text_client;
     QString m_text_repl;
-
     unsigned int m_modbus_start_address;
-
     bool m_isConnected;
     bool m_isReaded;
-    uint m_num_reads;
-    uint m_sec_counter;
-
-    unsigned int m_this_number;
-
     SrvReTranslater m_srv;
     unsigned int m_port_local;
-
     QString FormattedNodeString();
+    uint m_num_reads;
+    uint m_sec_counter;
+    unsigned int m_this_number;
     ScadaServer *ss;
 
+private:
+    static uint nodes_counter;
 
 signals:
     void textchange(int iUzel,QString objectName, QString newText);

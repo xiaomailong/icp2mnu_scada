@@ -8,15 +8,9 @@
 #include <QTextCodec>
 #include "logger.h"
 
-
-
-
 class Tag
 {
 public:
-//    Tag() {logger=Logger2::Instance();}
-
-//    Logger2 *logger;
     virtual float GetValueForTrend()=0;
     virtual bool GetQuality()=0;
     virtual char* GetTrendName()=0;
@@ -50,7 +44,6 @@ signals:
     void QualityChanged(bool newQuality);
 
 };
-
 //======================================================================
 
 #endif // TAG_H

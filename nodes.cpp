@@ -1,13 +1,6 @@
 #include "nodes.h"
 
 
-//extern const char *trend_path;
-//extern const float min_float=-3.4028234663852886e+38;
-//extern float empty_file[17280];
-
-//extern QVector<CommonTrend *> vectCommonTrends;
-//extern QHash<QString, CommonNode *> hashCommonNodes;     //for using in Virtual Controllers (data values)
-
 //allocate memory for static member
 uint CommonNode::nodes_counter=0;
 

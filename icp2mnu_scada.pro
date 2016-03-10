@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     odbcdb.cpp \
     configreader.cpp \
     nodedataviewer.cpp \
-    scadaserver.cpp
+    scadaserver.cpp \
+    trendwriter.cpp
 
 HEADERS  += mainwindow.h \
     autostopthread.h \
@@ -38,7 +39,8 @@ HEADERS  += mainwindow.h \
     odbcdb.h \
     configreader.h \
     nodedataviewer.h \
-    scadaserver.h
+    scadaserver.h \
+    trendwriter.h
 
 FORMS    += mainwindow.ui \
     logger.ui \

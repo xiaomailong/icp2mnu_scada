@@ -457,7 +457,7 @@ void Alarms::DeleteEnabledAlarm(Alarm *alarm)
     UpdateAllAlarmsToAllClients();
 }
 //==================================================================
-void Alarms::Kvitirovat(int count)
+void Alarms::AcknowledgeManyAlarms(int count)
 {
 
     QList<Alarm*>::iterator al_iter_begin;
@@ -488,13 +488,13 @@ void Alarms::Kvitirovat(int count)
 
 
 //==================================================================
-void Alarms::Kvitirovat2()
+void Alarms::AcknowledgeOneAlarm()
 {
     if (enabledAlarmList.size()>0)
     {
         if( !(enabledAlarmList.at(0)->IsConfirmed()) )
         {
-            Kvitirovat(1);
+            AcknowledgeManyAlarms(1);
             qSort(enabledAlarmList.begin(),enabledAlarmList.end(),compare_alarms);
             //enabledAlarmList.sort(compare_alarms);
             emit EnabledAlarmsChanged(&enabledAlarmList, false);

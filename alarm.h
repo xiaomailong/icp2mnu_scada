@@ -149,32 +149,38 @@ class Alarms : public AutoStopThread
 {
         Q_OBJECT
 public:
-    QList < Alarm* > enabledAlarmList;
-    QList < Alarm* > allAlarmsList;
-    static const unsigned int maxEnabledAlarmCount=50;
-
     Alarms();
     virtual ~Alarms();
-    int next_alarm_ID;
     void AddAlarm(AlarmLevel alarmlevel, AlarmType alarmType, FloatTag *tag,
                   AlarmCondition alarmcondition, float alarmvalue, QString alarmtext, uint alarmdelaySec=0);
     //overload for comfort usage
     void AddAlarm(QString str_alarmlevel,AlarmType alarmType,FloatTag *tag,QString str_alarmcondition,
                   float alarmvalue,QString alarmtext, uint alarmdelaySec=0);
+    QList < Alarm* > allAlarmsList;
+    QList < Alarm* > enabledAlarmList;
+
+private:
+    static const unsigned int maxEnabledAlarmCount=50;
+    int next_alarm_ID;
     void run();
     Logger *logger;
     OdbcDb *alarmDB;
+    QTcpServer* m_pAlarmServerSocket;
+    QList<QTcpSocket*> m_pAlarmClientSocketList;
+    //QTcpSocket* lastClient;
+
+    void UpdateAllAlarmsToAllClients();
+    void UpdateAllAlarmsToOneClient(QTcpSocket* pClient);
+
 signals:
     void EnabledAlarmsChanged(QList < Alarm* > *pEnabledAlarmList, bool onlyColorChange);
 
 public slots:
     void AddEnabledAlarm(Alarm *alarm);
     void DeleteEnabledAlarm(Alarm *alarm);
-    void Kvitirovat(int alarmscount);
-    void Kvitirovat2();
-
+    void AcknowledgeManyAlarms(int alarmscount);
+    void AcknowledgeOneAlarm();
     //tcp server
-public slots:
     // Slot to handle disconnected client
     void ClientDisconnected();
     void ClientWrite();
@@ -182,16 +188,6 @@ public slots:
 private slots:
     // New client connection
     void NewConnection();
-
-public:
-    QTcpServer* m_pAlarmServerSocket;
-    QList<QTcpSocket*> m_pAlarmClientSocketList;
-    //QTcpSocket* lastClient;
-    void UpdateAllAlarmsToAllClients();
-    void UpdateAllAlarmsToOneClient(QTcpSocket* pClient);
-
-
-
 };
 
 //=================================================================================
