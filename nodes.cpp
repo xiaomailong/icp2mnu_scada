@@ -426,23 +426,25 @@ void MinusInterval(int &iYear,int &iMonth,int &iDay, int &iHour,int &iMinute,int
     {
         MinusOneDay(iYear,iMonth,iDay);
         MinusInterval(iYear,iMonth,iDay, iHour,iMinute,iSecond,interval_sec-60*60*24);
-    } else
+    }
+    else
     {
-    if (interval_sec<=(iHour*60*60+iMinute*60+iSecond))
+        if (interval_sec<=(iHour*60*60+iMinute*60+iSecond))
          {
-         int temp=(iHour*60*60+iMinute*60+iSecond)-interval_sec;
-         iHour=temp/3600;
-         iMinute=(temp-iHour*3600)/60;
-         iSecond=temp-iHour*3600-iMinute*60;
-         }else
-              {
-         MinusOneDay(iYear,iMonth,iDay);
-         int temp=24*60*60+(iHour*60*60+iMinute*60+iSecond)-interval_sec;
+             int temp=(iHour*60*60+iMinute*60+iSecond)-interval_sec;
+             iHour=temp/3600;
+             iMinute=(temp-iHour*3600)/60;
+             iSecond=temp-iHour*3600-iMinute*60;
+         }
+         else
+         {
+             MinusOneDay(iYear,iMonth,iDay);
+             int temp=24*60*60+(iHour*60*60+iMinute*60+iSecond)-interval_sec;
 
-         iHour=temp/3600;
-         iMinute=(temp-iHour*3600)/60;
-         iSecond=temp-iHour*3600-iMinute*60;
-              }
+             iHour=temp/3600;
+             iMinute=(temp-iHour*3600)/60;
+             iSecond=temp-iHour*3600-iMinute*60;
+         }
     }
 }
 //=============================================================================================================
@@ -452,23 +454,25 @@ void PlusInterval(int &iYear,int &iMonth,int &iDay, int &iHour,int &iMinute,int 
     {
         PlusOneDay(iYear,iMonth,iDay);
         PlusInterval(iYear,iMonth,iDay, iHour,iMinute,iSecond,interval_sec-60*60*24);
-    } else
+    }
+    else
     {
-    if ((interval_sec+iHour*60*60+iMinute*60+iSecond)<24*60*60)
-         {
-         int temp=iHour*60*60+iMinute*60+iSecond+interval_sec;
-         iHour=temp/3600;
-         iMinute=(temp-iHour*3600)/60;
-         iSecond=temp-iHour*3600-iMinute*60;
-         }else
-              {
-         PlusOneDay(iYear,iMonth,iDay);
-         int temp=-24*60*60+(iHour*60*60+iMinute*60+iSecond)+interval_sec;
+        if ((interval_sec+iHour*60*60+iMinute*60+iSecond)<24*60*60)
+        {
+             int temp=iHour*60*60+iMinute*60+iSecond+interval_sec;
+             iHour=temp/3600;
+             iMinute=(temp-iHour*3600)/60;
+             iSecond=temp-iHour*3600-iMinute*60;
+        }
+        else
+        {
+             PlusOneDay(iYear,iMonth,iDay);
+             int temp=-24*60*60+(iHour*60*60+iMinute*60+iSecond)+interval_sec;
 
-         iHour=temp/3600;
-         iMinute=(temp-iHour*3600)/60;
-         iSecond=temp-iHour*3600-iMinute*60;
-              }
+             iHour=temp/3600;
+             iMinute=(temp-iHour*3600)/60;
+             iSecond=temp-iHour*3600-iMinute*60;
+        }
     }
 }
 //================================================================================================
@@ -712,10 +716,6 @@ void VirtualNode::TimerCalculateVariablesEvent()
             this->m_srv.buff[virtTag.numInBuff]=tmp_TagValue;
 
         }
-
-
-
-
 
 
         if (m_isConnected==false)

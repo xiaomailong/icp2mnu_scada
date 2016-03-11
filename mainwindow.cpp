@@ -224,16 +224,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     emit textSave2LogFile(-1, "","program started");
 
-
-    connect(&timer5s_checkConnectAndSendToClients,SIGNAL(timeout()),this,SLOT(TimerEvent5s()));
-    timer5s_checkConnectAndSendToClients.start(5000);
+    connect(&ss->timer5s_checkConnectAndSendToClients,SIGNAL(timeout()),ss,SLOT(TimerEvent5s_checkConnectAndSendToClients()));
+    ss->timer5s_checkConnectAndSendToClients.start(5000);
 
     ss->trendWriterThread = new TrendWriter();
     ss->trendWriterThread->start();
 
 
-     connect(&timer1s_setAlarmTags,SIGNAL(timeout()),this,SLOT(TimerEvent1s_setAlarmsTags()));
-     timer1s_setAlarmTags.start(1000);
+     connect(&ss->timer1s_setAlarmTags,SIGNAL(timeout()),ss,SLOT(TimerEvent1s_setAlarmsTags()));
+     ss->timer1s_setAlarmTags.start(1000);
 
      connect(ui->button_Confirm5Alarms, SIGNAL(clicked()),ss->alarms,SLOT(AcknowledgeOneAlarm()));
      connect(ss->alarms,SIGNAL(EnabledAlarmsChanged(QList<Alarm*>*,bool)),SLOT(alarmsChanged(QList<Alarm*>*,bool)));
@@ -319,109 +318,17 @@ void MainWindow::buttonMessagesShow_clicked()
 
 }
 
-
 //=========================================================================================================
-void MainWindow::TimerEvent1s_setAlarmsTags()
-{
-
-    static QScriptEngine alarmScriptEngine;
-
-    foreach(alarm_tag_struct alarmDescStruct, ss->vectAlarmTags)
-    {
-        if (alarmDescStruct.alarmType=="connect")
-        {
-            alarmDescStruct.alarmTag->SetValueQuality(ss->hashCommonNodes[alarmDescStruct.alarmExpression]->m_isConnected,true);
-           // logger->AddLog("Changed Alarm: "+alarmDescStruct.alarmType+"  " + alarmDescStruct.alarmExpression+"  val="+QString::number(hashCommonNodes[alarmDescStruct.alarmExpression]->m_isConnected),Qt::black);
-        }
-        else
-        {
-
-            bool  tmp_TagQuality=true;
-            float tmp_TagValue=0.0;
-            QString tmp_alarmExpression;
-
-            tmp_alarmExpression=alarmDescStruct.alarmExpression;
-
-            foreach(alarm_expr_member_struct alarmExprMember, alarmDescStruct.vectAlarmExprMembers)
-            {
-                  tmp_TagQuality&=ss->hashCommonNodes[alarmExprMember.objectName]->m_isReaded;
-            }
-
-            if (tmp_TagQuality)
-            {
-                foreach(alarm_expr_member_struct alarmExprMember, alarmDescStruct.vectAlarmExprMembers)
-                {
-                    tmp_alarmExpression.replace(alarmExprMember.objectName+"["+QString::number(alarmExprMember.numInBuff)+"]",
-                                                            QString::number(ss->hashCommonNodes[alarmExprMember.objectName]->m_srv.buff[alarmExprMember.numInBuff]));
-
-
-                }
-            //    logger->AddLog(alarmDescStruct.alarmExpression,Qt::black);
-                tmp_TagValue=alarmScriptEngine.evaluate(tmp_alarmExpression).toNumber();
-
-                if ( tmp_TagValue!=tmp_TagValue)  //тривиальная проверка на NaN
-                {
-                   tmp_TagValue=0.0;
-                   tmp_TagQuality=false;
-                   logger->AddLog("ERROR evaluate alarm formula: "+alarmDescStruct.alarmExpression, Qt::red);
-                }
-            }
-            else
-            {
-                tmp_TagValue=0.0;
-            }
-            alarmDescStruct.alarmTag->SetValueQuality(tmp_TagValue,tmp_TagQuality);
-
-        }
-    }
-}
-//=========================================================================================================
-void MainWindow::TimerEvent5s()
-{
-
-    foreach(CommonNode* node,ss->hashCommonNodes)
-    {
-       if (node->m_isReaded &&
-           !node->m_srv.m_pServerSocket->isListening())
-       {
-           node->m_srv.m_pServerSocket->listen(QHostAddress::Any, node->m_port_local);
-       }
-
-       if( node->m_isReaded &&
-           node->m_srv.m_pServerSocket->isListening())
-       {
-           for(int j=0;j<node->m_srv.m_pClientSocketList.size();j++)
-           {
-               node->m_srv.m_pClientSocketList.at(j)->write((char *)node->m_srv.buff,node->m_srv.num_float_tags*4);
-           }
-       }
-
-
-       if( !node->m_isReaded &&
-           node->m_srv.m_pServerSocket->isListening())
-       {
-           for(int j=0;j<node->m_srv.m_pClientSocketList.size();j++)
-           {
-               node->m_srv.m_pClientSocketList.at(j)->close();
-           }
-
-           node->m_srv.m_pServerSocket->close();
-           node->m_srv.m_pClientSocketList.clear();
-       }
-    }
-}
-
-//==================================================================================
-
 MainWindow::~MainWindow()
 {
 
     emit textSave2LogFile(-1, "","program closed");
 
-    //останавливаем таймеры алармов
+    //останавливаем таймер пересоединения и отправки пакетов данных
+    ss->timer5s_checkConnectAndSendToClients.stop();
 
-    timer5s_checkConnectAndSendToClients.stop();
-    timer1s_setAlarmTags.stop();
+    //останавливаем таймеры алармов
+    ss->timer1s_setAlarmTags.stop();
 
     //останавливаем поток записи трендов
     delete ss->trendWriterThread;

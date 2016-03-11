@@ -5,6 +5,7 @@
 #include <QMutex>
 #include <QVector>
 #include <QHash>
+#include <QTimer>
 //#include "nodes.h"
 #include "alarm.h"
 #include "trendwriter.h"
@@ -25,6 +26,7 @@ private:
     static ScadaServer* theSingleInstanceScadaServer;
 
     static QMutex mutex;
+    Logger *logger;
 
 public:
     static ScadaServer* GetInstance();
@@ -41,7 +43,11 @@ public:
     QHash<QString, CommonNode *> hashCommonNodes;
     QVector<CommonTrend *> vectCommonTrends;
     TrendWriter *trendWriterThread;
-
+    QTimer timer5s_checkConnectAndSendToClients;
+    QTimer timer1s_setAlarmTags;
+public slots:
+    void TimerEvent5s_checkConnectAndSendToClients();
+    void TimerEvent1s_setAlarmsTags();
 
 };
 

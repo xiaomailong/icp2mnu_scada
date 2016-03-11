@@ -45,8 +45,6 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QTimer timer5s_checkConnectAndSendToClients;
-    QTimer timer1s_setAlarmTags;
     Logger *logger;
     ScadaServer *ss;
 
@@ -54,8 +52,6 @@ private:
 public slots:
     void TextChanged(int iUzel,QString objectName, QString newText);
     void TextChanged_repl(int iUzel, QString objectName,QString newText);
-    void TimerEvent5s();
-    void TimerEvent1s_setAlarmsTags();
     void TextSave2LogFile(int iUzel, QString objectName,QString newText);
     void buttonMessagesShow_clicked();
     void alarmsChanged(QList<Alarm *> *pEnabledAlarmList, bool onlyColorChange);

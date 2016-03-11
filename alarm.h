@@ -43,9 +43,9 @@ enum AlarmType
 
 struct alarm_expr_member_struct
 {
-//QString sign;
-QString objectName;
-uint numInBuff;
+    //QString sign;
+    QString objectName;
+    uint numInBuff;
 };
 
 //сравнение для сортировки alarm_expr_member_struct по убыванию длины имени объекта, лямбду не принимает
@@ -55,10 +55,10 @@ bool operator<(const alarm_expr_member_struct &a, const alarm_expr_member_struct
 
 struct alarm_tag_struct
 {
-FloatTag *alarmTag;
-QString alarmType;
-QString alarmExpression;
-QVector<alarm_expr_member_struct> vectAlarmExprMembers;
+    FloatTag *alarmTag;
+    QString alarmType;
+    QString alarmExpression;
+    QVector<alarm_expr_member_struct> vectAlarmExprMembers;
 };
 
 struct alarm_message_struct
@@ -147,7 +147,8 @@ public slots:
 
 class Alarms : public AutoStopThread
 {
-        Q_OBJECT
+    Q_OBJECT
+
 public:
     Alarms();
     virtual ~Alarms();
