@@ -3,7 +3,7 @@
 //=========================================================================================
 TrendWriter::TrendWriter()
 {
-    ss=ScadaServer::GetInstance();
+    ss=ScadaServer::Instance();
 }
 //========================================================================================
 void TrendWriter::FuncFileWriter(CommonTrend *this_trend_info, char *str_date, uint time_pos)
@@ -15,23 +15,23 @@ void TrendWriter::FuncFileWriter(CommonTrend *this_trend_info, char *str_date, u
     QFile trend(filename);
 
     if (!trend.exists())  //Open(filename,CFile::modeWrite|CFile::modeNoTruncate|CFile::shareDenyNone,NULL))
-        {
+    {
 
-            if (trend.open(QIODevice::ReadWrite))
-            {
-                trend.write((char *)ss->empty_file,69120);
-                trend.seek(time_pos*4);//, CFile::begin);
-                trend.write((char *)&(ss->hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
-                trend.close();
-            }
-        }
-        else
+        if (trend.open(QIODevice::ReadWrite))
         {
-            trend.open(QIODevice::ReadWrite);
+            trend.write((char *)ss->empty_file,69120);
             trend.seek(time_pos*4);//, CFile::begin);
             trend.write((char *)&(ss->hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
             trend.close();
         }
+    }
+    else
+    {
+        trend.open(QIODevice::ReadWrite);
+        trend.seek(time_pos*4);//, CFile::begin);
+        trend.write((char *)&(ss->hashCommonNodes[this_trend_info->m_objectName]->m_srv.buff[this_trend_info->m_numInBuff]),4);
+        trend.close();
+    }
 
     return;
 }

@@ -1,4 +1,4 @@
-﻿#include "odbcdb.h"
+#include "odbcdb.h"
 
 
 //======================================================================
@@ -27,42 +27,43 @@ QString OdbcDb::GetNextName()
 //=======================================================================
 bool OdbcDb::ExecQuery(QString query)
 {
-bool res=true;
-QString connectionName=GetNextName();
+    bool res=true;
+    QString connectionName=GetNextName();
 
 
-{  // start of the block where the db object lives
-
-    QSqlDatabase db = QSqlDatabase::addDatabase("QODBC",connectionName);
-
-    db.setDatabaseName(odbcName);
-    db.setUserName(user);
-    db.setPassword(pass);
-
-    if (db.open())
     {
-        QSqlQuery sqlQuery(db);
-        sqlQuery.exec(query);
+        // start of the block where the db object lives
 
-        if (sqlQuery.lastError().isValid())
+        QSqlDatabase db = QSqlDatabase::addDatabase("QODBC",connectionName);
+
+        db.setDatabaseName(odbcName);
+        db.setUserName(user);
+        db.setPassword(pass);
+
+        if (db.open())
         {
-            logger->AddLog("ODBC: Ошибка "+sqlQuery.lastError().text(),Qt::red);
+            QSqlQuery sqlQuery(db);
+            sqlQuery.exec(query);
+
+            if (sqlQuery.lastError().isValid())
+            {
+                logger->AddLog("ODBC: Ошибка "+sqlQuery.lastError().text(),Qt::red);
+                res=false;
+            }
+
+        }
+        else
+        {
+            logger->AddLog("ODBC: Ошибка "+db.lastError().text(),Qt::red);
             res=false;
         }
+        logger->AddLog("ODBC: Выполнено :"+query,Qt::darkGreen);
+        db.close();
+    } // end of the block where the db object lives, it will be destroyed here
 
-    }
-    else
-    {
-        logger->AddLog("ODBC: Ошибка "+db.lastError().text(),Qt::red);
-        res=false;
-    }
-    logger->AddLog("ODBC: Выполнено :"+query,Qt::darkGreen);
-    db.close();
-} // end of the block where the db object lives, it will be destroyed here
+    QSqlDatabase::removeDatabase(connectionName);
 
-QSqlDatabase::removeDatabase(connectionName);
-
-return res;
+    return res;
 }
 //=======================================================================
 void OdbcDb::AddAlarm2DB(QString what)
@@ -71,11 +72,11 @@ void OdbcDb::AddAlarm2DB(QString what)
     QDateTime dt;
     dt=QDateTime::currentDateTime();
     strDateTime.sprintf("%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.3u",
-                dt.date().day(),dt.date().month(),dt.date().year(),
-                dt.time().hour(),dt.time().minute(),dt.time().second(),dt.time().msec());
+                        dt.date().day(),dt.date().month(),dt.date().year(),
+                        dt.time().hour(),dt.time().minute(),dt.time().second(),dt.time().msec());
 
 
-ExecQuery("INSERT INTO ALARMS(DT,ALARMTEXT) VALUES('" + strDateTime + "', '" + what + "')");
+    ExecQuery("INSERT INTO ALARMS(DT,ALARMTEXT) VALUES('" + strDateTime + "', '" + what + "')");
 
 
 }

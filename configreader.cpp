@@ -63,8 +63,8 @@ void ConfigReader::CloseConfig()
 }
 //================================================================
 bool ConfigReader::ReadNextNode(QString &objectName,QString &objectType,QString &IP_addr,
-                                       uint &port,uint &port_repl,uint &port_local,
-                                       uint &modbus_start_address,uint &num_float_tags)
+                                uint &port,uint &port_repl,uint &port_local,
+                                uint &modbus_start_address,uint &num_float_tags)
 {
     if (!foundSectionNodes)
     {
@@ -173,7 +173,7 @@ bool ConfigReader::ReadNextTrend(QString &objectName, QString &trendName,uint &n
 //2. warning talal[4]-ggpz_gz[5]>10.0 180 Разница больше 10,задержка 180с.
 //вектор содержит группы знак (+,-), имя узла, номер в буфере узла - из этого складывается результат
 bool ConfigReader::ReadNextAlarm(QString &alarmType, QString &alarmExpression, QVector<alarm_expr_member_struct> &alarmVectExprMembers,
-                   QString &alarmComparison, float &alarmValue, uint &alarmDelay_s, QString &alarmText)
+                                 QString &alarmComparison, float &alarmValue, uint &alarmDelay_s, QString &alarmText)
 {
     if (!foundSectionAlarms)
     {
@@ -228,18 +228,18 @@ bool ConfigReader::ReadNextAlarm(QString &alarmType, QString &alarmExpression, Q
                     //отрезать с учетом функций!!!!, т.е. talal[5] может идти не с начала (Math.abs(talal[5]-ggpz_gaz[6])
 
                     expr_members_line=expr_members_line.right(expr_members_line.length() - regExpExprMembers.pos(1) -
-                                                              regExpExprMembers.cap(1).length() -
-                                                              regExpExprMembers.cap(2).length() - 2);  //2 - two brackets []
+                                      regExpExprMembers.cap(1).length() -
+                                      regExpExprMembers.cap(2).length() - 2);  //2 - two brackets []
 
 
                     alarmVectExprMembers.append(member);
                 }
 
                 //массив отсортировать по убыванию  длины member.objectName
-                 // ЗАЧЕМ: чтобы исключить замену в длинных именах объектов боллее коротких частей (тоже имен обектов)
-                 //например "yaroshiv[1]-talal_z_yaroshiv[1]" при подстановке цифры вместо yaroshiv[1]
-                 //даст 12.568-talal_z_12.568
-                 //поэтому сначала заменять более длинные имена, talal_z_yaroshiv
+                // ЗАЧЕМ: чтобы исключить замену в длинных именах объектов боллее коротких частей (тоже имен обектов)
+                //например "yaroshiv[1]-talal_z_yaroshiv[1]" при подстановке цифры вместо yaroshiv[1]
+                //даст 12.568-talal_z_12.568
+                //поэтому сначала заменять более длинные имена, talal_z_yaroshiv
 
                 qSort(alarmVectExprMembers);
                 //лямбду не принимает -
@@ -311,18 +311,18 @@ bool ConfigReader::ReadNextVirtualTag(QString &objectName,uint &numInBuff,QStrin
                 //отрезать с учетом функций!!!!, т.е. talal[5] может идти не с начала (Math.abs(talal[5]-ggpz_gaz[6])
 
                 expr_members_line=expr_members_line.right(expr_members_line.length() - regExpExprMembers.pos(1) -
-                                                          regExpExprMembers.cap(1).length() -
-                                                          regExpExprMembers.cap(2).length() - 2);  //2 - two brackets []
+                                  regExpExprMembers.cap(1).length() -
+                                  regExpExprMembers.cap(2).length() - 2);  //2 - two brackets []
 
 
                 virtTagVectExprMembers.append(member);
             }
 
             //массив отсортировать по убыванию  длины member.objectName
-             // ЗАЧЕМ: чтобы исключить замену в длинных именах объектов боллее коротких частей (тоже имен обектов)
-             //например "yaroshiv[1]-talal_z_yaroshiv[1]" при подстановке цифры 12.568 вместо yaroshiv[1]
-             //даст 12.568-talal_z_12.568
-             //поэтому сначала заменять более длинные имена, talal_z_yaroshiv
+            // ЗАЧЕМ: чтобы исключить замену в длинных именах объектов боллее коротких частей (тоже имен обектов)
+            //например "yaroshiv[1]-talal_z_yaroshiv[1]" при подстановке цифры 12.568 вместо yaroshiv[1]
+            //даст 12.568-talal_z_12.568
+            //поэтому сначала заменять более длинные имена, talal_z_yaroshiv
 
             qSort(virtTagVectExprMembers);
             //лямбду не принимает -

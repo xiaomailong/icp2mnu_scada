@@ -1,4 +1,4 @@
-﻿
+
 /*
 Клас для наследования функциональности
 автозавершения потоков при закрытии программы
@@ -25,11 +25,21 @@ if (CheckThreadStop()) return;
 class AutoStopThread: public QThread
 {
     Q_OBJECT
- private:
-      volatile bool stopping;
- public:
-    AutoStopThread(){stopping=false;}
-    virtual ~AutoStopThread(){/*qDebug() << "stopping============================true";*/stopping=true;wait();}
-    bool CheckThreadStop(){return stopping;}
+private:
+    volatile bool stopping;
+public:
+    AutoStopThread()
+    {
+        stopping=false;
+    }
+    virtual ~AutoStopThread()
+    {
+        /*qDebug() << "stopping============================true";*/stopping=true;
+        wait();
+    }
+    bool CheckThreadStop()
+    {
+        return stopping;
+    }
 };
 #endif // AUTOSTOPTHREAD_H

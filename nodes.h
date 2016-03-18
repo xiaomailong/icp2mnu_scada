@@ -100,15 +100,18 @@ signals:
 
 class ModbusNode: public CommonNode
 {
-      Q_OBJECT
+    Q_OBJECT
 public:
-      explicit ModbusNode(int this_number,QString objectName,QString objectType,
-                          QString IP_addr, uint port,
-                          uint port_repl,uint port_local,
-                          uint modbus_start_address,
-                          uint num_float_tags);
-      virtual ~ModbusNode() {;}
-      virtual void run();   // poll loop thread
+    explicit ModbusNode(int this_number,QString objectName,QString objectType,
+                        QString IP_addr, uint port,
+                        uint port_repl,uint port_local,
+                        uint modbus_start_address,
+                        uint num_float_tags);
+    virtual ~ModbusNode()
+    {
+        ;
+    }
+    virtual void run();   // poll loop thread
 };
 
 
@@ -118,10 +121,10 @@ class MnuScadaNode : public CommonNode
     Q_OBJECT
 public:
     explicit MnuScadaNode(int this_number,QString objectName,QString objectType,
-                           QString IP_addr, uint port,
-                           uint port_repl,uint port_local,
-                           uint modbus_start_address,
-                           uint num_float_tags);
+                          QString IP_addr, uint port,
+                          uint port_repl,uint port_local,
+                          uint modbus_start_address,
+                          uint num_float_tags);
     virtual ~MnuScadaNode();
 
     QTcpSocket *socket;
@@ -153,23 +156,23 @@ public slots:
 //к нему можно подключиться по протоколу MADBUS
 class VirtualNode: public CommonNode
 {
-      Q_OBJECT
+    Q_OBJECT
 public:
-      explicit VirtualNode(int this_number,QString objectName,QString objectType,
-                          QString IP_addr, uint port,
-                          uint port_repl,uint port_local,
-                          uint modbus_start_address,
-                          uint num_float_tags);
-      virtual ~VirtualNode();
+    explicit VirtualNode(int this_number,QString objectName,QString objectType,
+                         QString IP_addr, uint port,
+                         uint port_repl,uint port_local,
+                         uint modbus_start_address,
+                         uint num_float_tags);
+    virtual ~VirtualNode();
 
-      QVector<virt_tag_struct> vectVirtTags;
+    QVector<virt_tag_struct> vectVirtTags;
 
 private:
-      QTimer timerCalculateVariables;
-      QScriptEngine virtControllerScriptEngine;
+    QTimer timerCalculateVariables;
+    QScriptEngine virtControllerScriptEngine;
 
 public slots:
-      void TimerCalculateVariablesEvent();
+    void TimerCalculateVariablesEvent();
 //      virtual void run();   //do not need, QTimer is better
 };
 //================================================================

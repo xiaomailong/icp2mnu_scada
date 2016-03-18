@@ -20,12 +20,12 @@ public:
     //QTcpSocket* lastClient;
 
 public slots:
-        // Slot to handle disconnected client
-        void ClientDisconnected();
+    // Slot to handle disconnected client
+    void ClientDisconnected();
 
 private slots:
-        // New client connection
-        void NewConnection();
+    // New client connection
+    void NewConnection();
 };
 
 

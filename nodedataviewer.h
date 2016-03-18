@@ -8,7 +8,8 @@
 
 #include "nodes.h"
 
-namespace Ui {
+namespace Ui
+{
 class NodeDataViewer;
 }
 

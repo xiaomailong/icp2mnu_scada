@@ -149,8 +149,8 @@ void Alarm::TagValueChanged(float newvalue)
 
 
     if ((preactive==false && alarmCondition==Bigger && newvalue>alarmValue  )   ||
-        (preactive==false && alarmCondition==Less   && newvalue<alarmValue  )   ||
-        (preactive==false && alarmCondition==Equal  && newvalue==alarmValue ))
+            (preactive==false && alarmCondition==Less   && newvalue<alarmValue  )   ||
+            (preactive==false && alarmCondition==Equal  && newvalue==alarmValue ))
     {
         //SetDateTimeOfAlarmActivating();
         dt_preactivated=QDateTime::currentDateTime();
@@ -158,8 +158,8 @@ void Alarm::TagValueChanged(float newvalue)
     }
 
     if ((preactive==true && alarmCondition==Bigger && newvalue<=alarmValue  )   ||
-        (preactive==true && alarmCondition==Less   && newvalue>=alarmValue  )   ||
-        (preactive==true && alarmCondition==Equal  && newvalue!=alarmValue ))
+            (preactive==true && alarmCondition==Less   && newvalue>=alarmValue  )   ||
+            (preactive==true && alarmCondition==Equal  && newvalue!=alarmValue ))
     {
         preactive=false;
     }
@@ -168,25 +168,25 @@ void Alarm::TagValueChanged(float newvalue)
 
 
     if ((preactive==true && active==false &&  dt_preactivated.secsTo(QDateTime::currentDateTime())>=delaySec && alarmCondition==Bigger && newvalue>alarmValue  )   ||
-        (preactive==true && active==false &&  dt_preactivated.secsTo(QDateTime::currentDateTime())>=delaySec && alarmCondition==Less && newvalue<alarmValue  )   ||
-        (preactive==true && active==false &&  dt_preactivated.secsTo(QDateTime::currentDateTime())>=delaySec && alarmCondition==Equal  && newvalue==alarmValue ))
+            (preactive==true && active==false &&  dt_preactivated.secsTo(QDateTime::currentDateTime())>=delaySec && alarmCondition==Less && newvalue<alarmValue  )   ||
+            (preactive==true && active==false &&  dt_preactivated.secsTo(QDateTime::currentDateTime())>=delaySec && alarmCondition==Equal  && newvalue==alarmValue ))
     {
         SetDateTimeOfAlarmActivating();
         active=true;
-  //      if (confirmed==true)
-  //      {
+        //      if (confirmed==true)
+        //      {
 
-           confirmed=false;
+        confirmed=false;
 
-   //     oldalarms.AddAlarm(this);
+        //     oldalarms.AddAlarm(this);
         emit AlarmActivating(this);
-  //      }
+        //      }
 
     }
 
     if ((active==true && alarmCondition==Bigger && newvalue<=alarmValue) ||
-        (active==true && alarmCondition==Less   && newvalue>=alarmValue) ||
-        (active==true && alarmCondition==Equal  && newvalue!=alarmValue))
+            (active==true && alarmCondition==Less   && newvalue>=alarmValue) ||
+            (active==true && alarmCondition==Equal  && newvalue!=alarmValue))
 
     {
         preactive=false;
@@ -200,30 +200,30 @@ void Alarm::TagValueChanged(float newvalue)
 //=================================================================
 void Alarm::TagQualityChanged(bool newquality)
 {
-float fltquality;
+    float fltquality;
     if (newquality) fltquality=1.0;
     else fltquality=0.0;
 
     if ((active==false && alarmCondition==Bigger && fltquality>alarmValue  )   ||
-        (active==false && alarmCondition==Less   && fltquality<alarmValue  )   ||
-        (active==false && alarmCondition==Equal  && fltquality==alarmValue ))
+            (active==false && alarmCondition==Less   && fltquality<alarmValue  )   ||
+            (active==false && alarmCondition==Equal  && fltquality==alarmValue ))
     {
         SetDateTimeOfAlarmActivating();
         active=true;
-  //      if (confirmed==true)
-  //      {
+        //      if (confirmed==true)
+        //      {
 
         confirmed=false;
 
-   //     oldalarms.AddAlarm(this);
+        //     oldalarms.AddAlarm(this);
         emit AlarmActivating(this);
-  //      }
+        //      }
 
     }
 
     if ((active==true && alarmCondition==Bigger && fltquality<=alarmValue) ||
-        (active==true && alarmCondition==Less   && fltquality>=alarmValue) ||
-        (active==true && alarmCondition==Equal  && fltquality!=alarmValue))
+            (active==true && alarmCondition==Less   && fltquality>=alarmValue) ||
+            (active==true && alarmCondition==Equal  && fltquality!=alarmValue))
 
     {
         active=false;
@@ -255,50 +255,50 @@ alarm_message_struct* Alarm::GetAlarmMessage()
     };
     */
 
-   alarm_message.ID=this->ID;
-   alarm_message.active=this->IsActive();
-   alarm_message.confirmed=this->IsConfirmed();
-   snprintf(alarm_message.text,ALARM_MESSAGE_TEXT,"%s ",this->GetTextOfAlarm().toStdString().c_str());
-   alarm_message.alarmLevel=this->alarmLevel;
-   alarm_message.alarmCondition=this->alarmCondition;
-   alarm_message.alarmType=this->alarmType;
-   alarm_message.alarmValue=this->alarmValue;
-   snprintf(alarm_message.DT_activate,20,"%s",this->GetDateTimeOfAlarmActivating().toStdString().c_str());
-   snprintf(alarm_message.DT_deactivate,20,"%s",this->GetDateTimeOfAlarmDeactivating().toStdString().c_str());
-   snprintf(alarm_message.DT_confirmate,20,"%s",this->GetDateTimeOfAlarmConfirming().toStdString().c_str());
+    alarm_message.ID=this->ID;
+    alarm_message.active=this->IsActive();
+    alarm_message.confirmed=this->IsConfirmed();
+    snprintf(alarm_message.text,ALARM_MESSAGE_TEXT,"%s ",this->GetTextOfAlarm().toStdString().c_str());
+    alarm_message.alarmLevel=this->alarmLevel;
+    alarm_message.alarmCondition=this->alarmCondition;
+    alarm_message.alarmType=this->alarmType;
+    alarm_message.alarmValue=this->alarmValue;
+    snprintf(alarm_message.DT_activate,20,"%s",this->GetDateTimeOfAlarmActivating().toStdString().c_str());
+    snprintf(alarm_message.DT_deactivate,20,"%s",this->GetDateTimeOfAlarmDeactivating().toStdString().c_str());
+    snprintf(alarm_message.DT_confirmate,20,"%s",this->GetDateTimeOfAlarmConfirming().toStdString().c_str());
 
-   this->actColor.getRgb(&(alarm_message.actColor_r),&(alarm_message.actColor_g),&(alarm_message.actColor_b));
-   this->act2Color.getRgb(&(alarm_message.act2Color_r),&(alarm_message.act2Color_g),&(alarm_message.act2Color_b));
-   this->nonactColor.getRgb(&(alarm_message.nonactColor_r),&(alarm_message.nonactColor_g),&(alarm_message.nonactColor_b));
+    this->actColor.getRgb(&(alarm_message.actColor_r),&(alarm_message.actColor_g),&(alarm_message.actColor_b));
+    this->act2Color.getRgb(&(alarm_message.act2Color_r),&(alarm_message.act2Color_g),&(alarm_message.act2Color_b));
+    this->nonactColor.getRgb(&(alarm_message.nonactColor_r),&(alarm_message.nonactColor_g),&(alarm_message.nonactColor_b));
 
-   return &alarm_message;
+    return &alarm_message;
 
 }
 //=================================================================
 Alarms::Alarms()
 {
-next_alarm_ID=0;
-logger=Logger::Instance();
-enabledAlarmList.clear();
+    next_alarm_ID=0;
+    logger=Logger::Instance();
+    enabledAlarmList.clear();
 
-alarmDB=new OdbcDb("fire_alarmdb","SYSDBA","784523");
-alarmDB->AddAlarm2DB("Alarms Server Started...");
+    alarmDB=new OdbcDb("fire_alarmdb","SYSDBA","784523");
+    alarmDB->AddAlarm2DB("Alarms Server Started...");
 
-logger->AddLog("АЛАРМ: Старт подсистемы...",Qt::darkCyan);
+    logger->AddLog("АЛАРМ: Старт подсистемы...",Qt::darkCyan);
 
 //tcp server
-m_pAlarmServerSocket = new QTcpServer(this);
-m_pAlarmServerSocket->listen(QHostAddress::Any, 7000);
+    m_pAlarmServerSocket = new QTcpServer(this);
+    m_pAlarmServerSocket->listen(QHostAddress::Any, 7000);
 
-connect(m_pAlarmServerSocket, SIGNAL(newConnection()), this, SLOT(NewConnection()));
+    connect(m_pAlarmServerSocket, SIGNAL(newConnection()), this, SLOT(NewConnection()));
 
 }
 //=================================================================
 Alarms::~Alarms()
 {
-   alarmDB->AddAlarm2DB("Alarms Server Closed...");
-   delete alarmDB;
-   delete m_pAlarmServerSocket;
+    alarmDB->AddAlarm2DB("Alarms Server Closed...");
+    delete alarmDB;
+    delete m_pAlarmServerSocket;
 }
 //=================================================================
 
@@ -370,19 +370,19 @@ void Alarms::ClientWrite()
 //====================================================================================
 void Alarms::UpdateAllAlarmsToOneClient(QTcpSocket* pClient)
 {
-alarm_message_struct erase_message;
-erase_message.ID=-1;
-erase_message.text[0]=0;
+    alarm_message_struct erase_message;
+    erase_message.ID=-1;
+    erase_message.text[0]=0;
 
-        pClient->write((char *)&erase_message,sizeof(alarm_message_struct));
+    pClient->write((char *)&erase_message,sizeof(alarm_message_struct));
 
-        qDebug() << "writing to alarm =" << sizeof(alarm_message_struct);
+    qDebug() << "writing to alarm =" << sizeof(alarm_message_struct);
 
-        foreach(Alarm *alarm, enabledAlarmList)
-        {
-            pClient->write((char *)alarm->GetAlarmMessage(),sizeof(alarm_message_struct));
-            pClient->waitForBytesWritten(5000);
-        }
+    foreach(Alarm *alarm, enabledAlarmList)
+    {
+        pClient->write((char *)alarm->GetAlarmMessage(),sizeof(alarm_message_struct));
+        pClient->waitForBytesWritten(5000);
+    }
 }
 //=================================================================
 void Alarms::UpdateAllAlarmsToAllClients()
@@ -395,7 +395,7 @@ void Alarms::UpdateAllAlarmsToAllClients()
 //=================================================================
 
 void Alarms::AddAlarm(AlarmLevel alarmlevel,AlarmType alarmType,FloatTag *tag,AlarmCondition alarmcondition,
-              float alarmvalue,QString alarmtext, uint alarmdelaySec)
+                      float alarmvalue,QString alarmtext, uint alarmdelaySec)
 {
     next_alarm_ID++;
     Alarm *newAlarm=new Alarm(this, next_alarm_ID, alarmlevel,alarmType,tag,alarmcondition, alarmvalue,alarmtext,alarmdelaySec);
@@ -406,7 +406,7 @@ void Alarms::AddAlarm(AlarmLevel alarmlevel,AlarmType alarmType,FloatTag *tag,Al
 //=================================================================
 //overload for comfort usage
 void Alarms::AddAlarm(QString str_alarmlevel, AlarmType alarmType, FloatTag *tag, QString str_alarmcondition,
-              float alarmvalue, QString alarmtext, uint alarmdelaySec)
+                      float alarmvalue, QString alarmtext, uint alarmdelaySec)
 {
     AlarmLevel alarmlevel=Information;
     AlarmCondition alarmcondition=Less;
@@ -448,7 +448,7 @@ void Alarms::DeleteEnabledAlarm(Alarm *alarm)
 {
     if (alarm->IsConfirmed())   // 5.11.2015
     {
-    enabledAlarmList.removeOne(alarm);
+        enabledAlarmList.removeOne(alarm);
     }
     emit EnabledAlarmsChanged(&enabledAlarmList, false);
     logger->AddLog("АЛАРМ: Пропал: "+alarm->GetTextOfAlarm(),Qt::darkCyan);
@@ -465,24 +465,24 @@ void Alarms::AcknowledgeManyAlarms(int count)
 
     if (enabledAlarmList.size()>0)
     {
-    al_iter_begin=enabledAlarmList.begin();
-    al_iter_end=enabledAlarmList.end();
+        al_iter_begin=enabledAlarmList.begin();
+        al_iter_end=enabledAlarmList.end();
 
-    for(int i=0;i<count;++i)
-    {
-    if (al_iter_begin!=al_iter_end)
-    {
-        if (!(*al_iter_begin)->IsConfirmed())
+        for(int i=0; i<count; ++i)
         {
-        (*al_iter_begin)->SetConfirmed(true);
-        logger->AddLog("АЛАРМ: Квитирован на сервере: "+(*al_iter_begin)->GetTextOfAlarm(),Qt::darkCyan);
-        alarmDB->AddAlarm2DB("Квитований з сервера: "+(*al_iter_begin)->GetTextOfAlarm() +
-                             "  ("+QString::number((*al_iter_begin)->alarmValue,'f',2)+")");
+            if (al_iter_begin!=al_iter_end)
+            {
+                if (!(*al_iter_begin)->IsConfirmed())
+                {
+                    (*al_iter_begin)->SetConfirmed(true);
+                    logger->AddLog("АЛАРМ: Квитирован на сервере: "+(*al_iter_begin)->GetTextOfAlarm(),Qt::darkCyan);
+                    alarmDB->AddAlarm2DB("Квитований з сервера: "+(*al_iter_begin)->GetTextOfAlarm() +
+                                         "  ("+QString::number((*al_iter_begin)->alarmValue,'f',2)+")");
+                }
+                al_iter_begin++;
+            }
+            else break;
         }
-        al_iter_begin++;
-    }
-    else break;
-    }
     }
 }
 

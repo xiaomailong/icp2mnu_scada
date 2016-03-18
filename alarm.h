@@ -22,9 +22,9 @@ using std::list;
 
 enum AlarmLevel
 {
-   Critical,
-   Warning,
-   Information
+    Critical,
+    Warning,
+    Information
 };
 
 enum AlarmCondition
@@ -48,7 +48,7 @@ struct alarm_expr_member_struct
     uint numInBuff;
 };
 
-//сравнение для сортировки alarm_expr_member_struct по убыванию длины имени объекта, лямбду не принимает
+//сравнение для сортировки alarm_expr_member_struct по убыванию длины имени объекта, лямбду не принимает (без C++11)
 //static надо убрать - а то свои копии в каждом модуле
 //static bool operator<(const alarm_expr_member_struct &a, const alarm_expr_member_struct &b) { return a.objectName.length() > b.objectName.length(); }
 bool operator<(const alarm_expr_member_struct &a, const alarm_expr_member_struct &b);
@@ -63,27 +63,27 @@ struct alarm_tag_struct
 
 struct alarm_message_struct
 {
-  int ID; //ID от 1 до alarm_count... - идентификаторы алармов, меньше 0 - команды, пока команда одна = -1 - clear all alarms у клиента
-  bool active;
-  bool confirmed;
-  char text[ALARM_MESSAGE_TEXT];
+    int ID; //ID от 1 до alarm_count... - идентификаторы алармов, меньше 0 - команды, пока команда одна = -1 - clear all alarms у клиента
+    bool active;
+    bool confirmed;
+    char text[ALARM_MESSAGE_TEXT];
 
-  AlarmLevel alarmLevel;
-  AlarmCondition alarmCondition;
-  AlarmType alarmType;
-  float alarmValue;
-  char DT_activate[20];
-  char DT_confirmate[20];
-  char DT_deactivate[20];
-  int actColor_r;
-  int actColor_g;
-  int actColor_b;
-  int act2Color_r;
-  int act2Color_g;
-  int act2Color_b;
-  int nonactColor_r;
-  int nonactColor_g;
-  int nonactColor_b;
+    AlarmLevel alarmLevel;
+    AlarmCondition alarmCondition;
+    AlarmType alarmType;
+    float alarmValue;
+    char DT_activate[20];
+    char DT_confirmate[20];
+    char DT_deactivate[20];
+    int actColor_r;
+    int actColor_g;
+    int actColor_b;
+    int act2Color_r;
+    int act2Color_g;
+    int act2Color_b;
+    int nonactColor_r;
+    int nonactColor_g;
+    int nonactColor_b;
 };
 
 
@@ -115,7 +115,7 @@ public:
     QDateTime dt_deactivated;
     //Alarm();
     explicit Alarm(Alarms *alarms, int id, AlarmLevel alarmlevel,AlarmType alarmtype,FloatTag *tag,
-                 AlarmCondition alarmcondition,float alarmvalue,QString alarmtext, uint alarmdelaySec=0);
+                   AlarmCondition alarmcondition,float alarmvalue,QString alarmtext, uint alarmdelaySec=0);
     void SetDateTimeOfAlarmActivating();
     void SetDateTimeOfAlarmDeactivating();
     void SetDateTimeOfAlarmConfirming();

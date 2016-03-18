@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ss = ScadaServer::GetInstance();
+    ss = ScadaServer::Instance();
 
     connect(ui->buttonClose,SIGNAL(clicked()),this,SLOT(close()));
 
@@ -25,8 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->listWidget,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(ViewNodeData(QListWidgetItem*)));
 
 
-      // configuration  - ConfigReader class
-      //     To DO - add configuration from file to trends and alarms
+    // configuration  - ConfigReader class
+    //     To DO - add configuration from file to trends and alarms
 
 
     ConfigReader configReader;
@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if (configReader.OpenConfig())
     {
-    //[NODES]
+        //[NODES]
         QString objectName;
         QString objectType;
         QString IP_addr;
@@ -44,122 +44,122 @@ MainWindow::MainWindow(QWidget *parent) :
         uint modbus_start_address;
         uint num_float_tags;
 
-         while(configReader.ReadNextNode(objectName,objectType,IP_addr, port,
-                                         port_repl,port_local,
-                                         modbus_start_address, num_float_tags))
-         {
+        while(configReader.ReadNextNode(objectName,objectType,IP_addr, port,
+                                        port_repl,port_local,
+                                        modbus_start_address, num_float_tags))
+        {
 
 
-             CommonNode *node = CommonNode::CreateNode(objectName,objectType,IP_addr, port,
-                                                       port_repl,port_local,
-                                                       modbus_start_address, num_float_tags);
+            CommonNode *node = CommonNode::CreateNode(objectName,objectType,IP_addr, port,
+                               port_repl,port_local,
+                               modbus_start_address, num_float_tags);
 
-             connect(node,SIGNAL(textchange(int,QString,QString)),this,SLOT(TextChanged(int,QString,QString)));
-             connect(node,SIGNAL(textSave2LogFile(int,QString,QString)),this,SLOT(TextSave2LogFile(int,QString,QString)));
-             connect(node,SIGNAL(textchange_repl(int,QString,QString)),this,SLOT(TextChanged_repl(int,QString,QString)));
+            connect(node,SIGNAL(textchange(int,QString,QString)),this,SLOT(TextChanged(int,QString,QString)));
+            connect(node,SIGNAL(textSave2LogFile(int,QString,QString)),this,SLOT(TextSave2LogFile(int,QString,QString)));
+            connect(node,SIGNAL(textchange_repl(int,QString,QString)),this,SLOT(TextChanged_repl(int,QString,QString)));
 
-             ui->listWidget->addItem(node->FormattedNodeString());
+            ui->listWidget->addItem(node->FormattedNodeString());
 
-             ss->hashCommonNodes.insert(node->m_nameObject,node);
+            ss->hashCommonNodes.insert(node->m_nameObject,node);
 
-             //create Dirs
-             QDir nodeDir(QString(ss->trend_path)+"\\"+node->m_nameObject);
-             if (!nodeDir.exists()) nodeDir.mkdir(QString(ss->trend_path)+"\\"+node->m_nameObject);
+            //create Dirs
+            QDir nodeDir(QString(ss->trend_path)+"\\"+node->m_nameObject);
+            if (!nodeDir.exists()) nodeDir.mkdir(QString(ss->trend_path)+"\\"+node->m_nameObject);
 
-             logger->AddLog("Added Node: "+node->m_nameObject+": " + node->m_IP_addr+":" + QString::number(node->m_port)+
-                                   "(" + node->m_typeObject + ", tags=" + QString::number(node->m_srv.num_float_tags)+")",Qt::black);
-          }
+            logger->AddLog("Added Node: "+node->m_nameObject+": " + node->m_IP_addr+":" + QString::number(node->m_port)+
+                           "(" + node->m_typeObject + ", tags=" + QString::number(node->m_srv.num_float_tags)+")",Qt::black);
+        }
 
-         //[TRENDS]
-         //QString objectName; - redeclaration
-         configReader.SeekStartConfig();
-         QString trendName;
-         uint numInBuff;
+        //[TRENDS]
+        //QString objectName; - redeclaration
+        configReader.SeekStartConfig();
+        QString trendName;
+        uint numInBuff;
 
-          while(configReader.ReadNextTrend(objectName,trendName,numInBuff))
-          {
-              if (ss->hashCommonNodes.contains(objectName))
-              {
-                  CommonTrend *trend = new CommonTrend(objectName,trendName,numInBuff);
-                  ss->vectCommonTrends.append(trend);
-                  logger->AddLog("Added Trend: "+trend->m_objectName+"  " + trend->m_trendName+"  " + QString::number(trend->m_numInBuff),Qt::darkBlue);
-              }
-              else
-              {
-                  logger->AddLog("ERROR Adding Trend (object not exists): "+objectName+"  " + trendName+"  " + QString::number(numInBuff),Qt::red);
-              }
-           }
-          //[ALARMS]
-         configReader.SeekStartConfig();
+        while(configReader.ReadNextTrend(objectName,trendName,numInBuff))
+        {
+            if (ss->hashCommonNodes.contains(objectName))
+            {
+                CommonTrend *trend = new CommonTrend(objectName,trendName,numInBuff);
+                ss->vectCommonTrends.append(trend);
+                logger->AddLog("Added Trend: "+trend->m_objectName+"  " + trend->m_trendName+"  " + QString::number(trend->m_numInBuff),Qt::darkBlue);
+            }
+            else
+            {
+                logger->AddLog("ERROR Adding Trend (object not exists): "+objectName+"  " + trendName+"  " + QString::number(numInBuff),Qt::red);
+            }
+        }
+        //[ALARMS]
+        configReader.SeekStartConfig();
 
-         QString alarmType;
-         QString alarmExpression;
-         QVector<alarm_expr_member_struct> alarmVectExprMembers;
-         QString alarmComparison;
-         float alarmValue;
-         uint alarmDelay_s;
-         QString alarmText;
+        QString alarmType;
+        QString alarmExpression;
+        QVector<alarm_expr_member_struct> alarmVectExprMembers;
+        QString alarmComparison;
+        float alarmValue;
+        uint alarmDelay_s;
+        QString alarmText;
 
-         alarm_tag_struct alarmDescStruct;
+        alarm_tag_struct alarmDescStruct;
 
-         while(configReader.ReadNextAlarm(alarmType, alarmExpression, alarmVectExprMembers,
-                                          alarmComparison, alarmValue, alarmDelay_s, alarmText))
-         {
+        while(configReader.ReadNextAlarm(alarmType, alarmExpression, alarmVectExprMembers,
+                                         alarmComparison, alarmValue, alarmDelay_s, alarmText))
+        {
 
 
-             alarmDescStruct.alarmType=alarmType;
-             alarmDescStruct.alarmExpression=alarmExpression;
-             alarmDescStruct.vectAlarmExprMembers=alarmVectExprMembers;
+            alarmDescStruct.alarmType=alarmType;
+            alarmDescStruct.alarmExpression=alarmExpression;
+            alarmDescStruct.vectAlarmExprMembers=alarmVectExprMembers;
 
-             if (alarmType=="connect")
-             {
-                 if (ss->hashCommonNodes.contains(alarmExpression))
-                 {
+            if (alarmType=="connect")
+            {
+                if (ss->hashCommonNodes.contains(alarmExpression))
+                {
                     //connect alarms yellow("warning") color use
                     alarmDescStruct.alarmTag=new FloatTag();
                     ss->alarms->AddAlarm("warning",OnValueChanged,alarmDescStruct.alarmTag,alarmComparison,alarmValue,alarmText, alarmDelay_s);
                     ss->vectAlarmTags.append(alarmDescStruct);
-                 }
-                 else
-                 {
+                }
+                else
+                {
                     logger->AddLog("ERROR Adding connect Alarm (object not exists): "+alarmExpression,Qt::red);
-                 }
-             }
-             else  //information|warning|critical
-             {
-                  bool allMembersExist=true;
-                  foreach(alarm_expr_member_struct alarmExprMember, alarmVectExprMembers)
-                  {
-                     if (!ss->hashCommonNodes.contains(alarmExprMember.objectName)) allMembersExist=false;
-                  }
+                }
+            }
+            else  //information|warning|critical
+            {
+                bool allMembersExist=true;
+                foreach(alarm_expr_member_struct alarmExprMember, alarmVectExprMembers)
+                {
+                    if (!ss->hashCommonNodes.contains(alarmExprMember.objectName)) allMembersExist=false;
+                }
 
-                  if (allMembersExist)
-                  {
-                      alarmDescStruct.alarmTag=new FloatTag();
-                      ss->alarms->AddAlarm(alarmType,OnValueChanged,alarmDescStruct.alarmTag,alarmComparison,alarmValue,alarmText, alarmDelay_s);
-                      ss->vectAlarmTags.append(alarmDescStruct);
-                  }
-                  else
-                  {
-                      logger->AddLog("ERROR Adding Alarm (object not exists): "+alarmDescStruct.alarmType+"  "+alarmDescStruct.alarmExpression +
-                                     " "+alarmText,Qt::red);
+                if (allMembersExist)
+                {
+                    alarmDescStruct.alarmTag=new FloatTag();
+                    ss->alarms->AddAlarm(alarmType,OnValueChanged,alarmDescStruct.alarmTag,alarmComparison,alarmValue,alarmText, alarmDelay_s);
+                    ss->vectAlarmTags.append(alarmDescStruct);
+                }
+                else
+                {
+                    logger->AddLog("ERROR Adding Alarm (object not exists): "+alarmDescStruct.alarmType+"  "+alarmDescStruct.alarmExpression +
+                                   " "+alarmText,Qt::red);
 
-                  }
+                }
 
-             //TEST
-             //   foreach(alarm_expr_member_struct alarmExprMember, alarmVectExprMembers)
-             //   {
-             //       logger->AddLog("Added Alarm Exp Member: "+alarmDescStruct.alarmType+"  " + alarmDescStruct.alarmExpression + " " +
-             //                      alarmExprMember.objectName+","+QString::number(alarmExprMember.numInBuff),Qt::black);
-             //   }
-             }
+                //TEST
+                //   foreach(alarm_expr_member_struct alarmExprMember, alarmVectExprMembers)
+                //   {
+                //       logger->AddLog("Added Alarm Exp Member: "+alarmDescStruct.alarmType+"  " + alarmDescStruct.alarmExpression + " " +
+                //                      alarmExprMember.objectName+","+QString::number(alarmExprMember.numInBuff),Qt::black);
+                //   }
+            }
 
 
-             //TEST
-             //logger->AddLog("Added Alarm: "+alarmDescStruct.alarmType+"  " + alarmDescStruct.alarmExpression,Qt::black);
-          }
+            //TEST
+            //logger->AddLog("Added Alarm: "+alarmDescStruct.alarmType+"  " + alarmDescStruct.alarmExpression,Qt::black);
+        }
 
-         //[VIRTUAL_CONTROLLERS]
+        //[VIRTUAL_CONTROLLERS]
         configReader.SeekStartConfig();
 
         QString virtTagExpression;
@@ -173,48 +173,48 @@ MainWindow::MainWindow(QWidget *parent) :
             virtTagDescStruct.virtTagExpression=virtTagExpression;
             virtTagDescStruct.vectVirtTagExprMembers=virtTagVectExprMembers;
 
-                 bool allMembersExist=true;
-                 foreach(virt_expr_member_struct virtTagExprMember, virtTagVectExprMembers)
-                 {
-                    if (!ss->hashCommonNodes.contains(virtTagExprMember.objectName)) allMembersExist=false;
-                 }
+            bool allMembersExist=true;
+            foreach(virt_expr_member_struct virtTagExprMember, virtTagVectExprMembers)
+            {
+                if (!ss->hashCommonNodes.contains(virtTagExprMember.objectName)) allMembersExist=false;
+            }
 
-                 if (allMembersExist)
-                 {
-                     VirtualNode *vn=0;
-                     if (ss->hashCommonNodes.contains(objectName))
-                     vn=dynamic_cast<VirtualNode *>(ss->hashCommonNodes[objectName]);
-                     if (vn!=0)
-                     {
-                        vn->vectVirtTags.append(virtTagDescStruct);
-                        logger->AddLog("Adding Virtual Tag Formula: "+objectName+"["+
-                                       QString::number(virtTagDescStruct.numInBuff)+"] = "+virtTagDescStruct.virtTagExpression, Qt::black);
-                     }
-                     else
-                     {
-                         logger->AddLog("ERROR Adding Virtual Tag Formula(virt controller not exists): "+objectName+" "+
-                                        QString::number(virtTagDescStruct.numInBuff)+" "+virtTagDescStruct.virtTagExpression, Qt::red);
-                     }
-                 }
-                 else
-                 {
-                     logger->AddLog("ERROR Adding Virtual Tag Formula(object not exists in formula): "+objectName+" "+
-                                    QString::number(virtTagDescStruct.numInBuff)+" "+virtTagDescStruct.virtTagExpression, Qt::red);
+            if (allMembersExist)
+            {
+                VirtualNode *vn=0;
+                if (ss->hashCommonNodes.contains(objectName))
+                    vn=dynamic_cast<VirtualNode *>(ss->hashCommonNodes[objectName]);
+                if (vn!=0)
+                {
+                    vn->vectVirtTags.append(virtTagDescStruct);
+                    logger->AddLog("Adding Virtual Tag Formula: "+objectName+"["+
+                                   QString::number(virtTagDescStruct.numInBuff)+"] = "+virtTagDescStruct.virtTagExpression, Qt::black);
+                }
+                else
+                {
+                    logger->AddLog("ERROR Adding Virtual Tag Formula(virt controller not exists): "+objectName+" "+
+                                   QString::number(virtTagDescStruct.numInBuff)+" "+virtTagDescStruct.virtTagExpression, Qt::red);
+                }
+            }
+            else
+            {
+                logger->AddLog("ERROR Adding Virtual Tag Formula(object not exists in formula): "+objectName+" "+
+                               QString::number(virtTagDescStruct.numInBuff)+" "+virtTagDescStruct.virtTagExpression, Qt::red);
 
-                 }
+            }
 
             //TEST
-           //    foreach(virt_expr_member_struct virtTagExprMember, virtTagVectExprMembers)
-           //    {
-           //        logger->AddLog("Added Alarm Exp Member: "+virtTagDescStruct.virtTagExpression + " " +
-           //                       virtTagExprMember.objectName+","+QString::number(virtTagExprMember.numInBuff),Qt::black);
-           //    }
+            //    foreach(virt_expr_member_struct virtTagExprMember, virtTagVectExprMembers)
+            //    {
+            //        logger->AddLog("Added Alarm Exp Member: "+virtTagDescStruct.virtTagExpression + " " +
+            //                       virtTagExprMember.objectName+","+QString::number(virtTagExprMember.numInBuff),Qt::black);
+            //    }
 
 
 
             //TEST
             //logger->AddLog("Added Alarm: "+alarmDescStruct.alarmType+"  " + alarmDescStruct.alarmExpression,Qt::black);
-         }
+        }
 
         configReader.CloseConfig();
     }
@@ -222,20 +222,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this,SIGNAL(textSave2LogFile(int,QString,QString)),this,SLOT(TextSave2LogFile(int,QString,QString)));
 
-    emit textSave2LogFile(-1, "","program started");
 
-    connect(&ss->timer5s_checkConnectAndSendToClients,SIGNAL(timeout()),ss,SLOT(TimerEvent5s_checkConnectAndSendToClients()));
-    ss->timer5s_checkConnectAndSendToClients.start(5000);
+    ss->StartServer();
+    emit textSave2LogFile(-1, "","ScadaServer started");
 
-    ss->trendWriterThread = new TrendWriter();
-    ss->trendWriterThread->start();
-
-
-     connect(&ss->timer1s_setAlarmTags,SIGNAL(timeout()),ss,SLOT(TimerEvent1s_setAlarmsTags()));
-     ss->timer1s_setAlarmTags.start(1000);
-
-     connect(ui->button_Confirm5Alarms, SIGNAL(clicked()),ss->alarms,SLOT(AcknowledgeOneAlarm()));
-     connect(ss->alarms,SIGNAL(EnabledAlarmsChanged(QList<Alarm*>*,bool)),SLOT(alarmsChanged(QList<Alarm*>*,bool)));
+    connect(ui->button_AcknowledgeLastAlarm, SIGNAL(clicked()),ss->alarms,SLOT(AcknowledgeOneAlarm()));
+    connect(ss->alarms,SIGNAL(EnabledAlarmsChanged(QList<Alarm*>*,bool)),this,SLOT(alarmsChanged(QList<Alarm*>*,bool)));
 }
 //=========================================================================================================
 void MainWindow::alarmsChanged(QList < Alarm* > *pEnabledAlarmList, bool onlyColorChange)
@@ -245,7 +237,7 @@ void MainWindow::alarmsChanged(QList < Alarm* > *pEnabledAlarmList, bool onlyCol
 
     if (!onlyColorChange)
     {
-    ui->alarmWidget->clear();
+        ui->alarmWidget->clear();
         foreach(Alarm *alarm, *pEnabledAlarmList)
         {
             {
@@ -279,7 +271,7 @@ void MainWindow::alarmsChanged(QList < Alarm* > *pEnabledAlarmList, bool onlyCol
                     ui->alarmWidget->item(i)->setBackground(alarm->nonactColor);
                 }
             }
-        ++i;
+            ++i;
         }
     }
     else
@@ -299,7 +291,7 @@ void MainWindow::alarmsChanged(QList < Alarm* > *pEnabledAlarmList, bool onlyCol
                     }
                 }
             }
-        ++i;
+            ++i;
         }
 
     }
@@ -308,10 +300,10 @@ void MainWindow::alarmsChanged(QList < Alarm* > *pEnabledAlarmList, bool onlyCol
 void MainWindow::buttonMessagesShow_clicked()
 {
     logger->InstanceWindow()->setGeometry(this->width()-logger->InstanceWindow()->width(),
-                                //messagesWindow->geometry().y()- messagesWindow->pos().y(),
-                                40,
-                                logger->InstanceWindow()->width(),
-                                logger->InstanceWindow()->height());
+                                          //messagesWindow->geometry().y()- messagesWindow->pos().y(),
+                                          40,
+                                          logger->InstanceWindow()->width(),
+                                          logger->InstanceWindow()->height());
 
     logger->InstanceWindow()->setWindowFlags(Qt::WindowStaysOnTopHint);
     logger->InstanceWindow()->show();
@@ -322,35 +314,9 @@ void MainWindow::buttonMessagesShow_clicked()
 MainWindow::~MainWindow()
 {
 
-    emit textSave2LogFile(-1, "","program closed");
+    emit textSave2LogFile(-1, "","ScadaServer stopped");
 
-    //останавливаем таймер пересоединения и отправки пакетов данных
-    ss->timer5s_checkConnectAndSendToClients.stop();
-
-    //останавливаем таймеры алармов
-    ss->timer1s_setAlarmTags.stop();
-
-    //останавливаем поток записи трендов
-    delete ss->trendWriterThread;
-
-    //останавливаем потоки опроса узлов
-    foreach(CommonNode* node,ss->hashCommonNodes)
-    {
-        delete node;
-    }
-
-    // и далее все удаляем
-    ss->hashCommonNodes.clear();
-
-    foreach(CommonTrend* trend,ss->vectCommonTrends)
-    {
-        delete trend;
-    }
-
-    ss->vectCommonTrends.clear();
-
-
-
+    ss->StopServer();
 
     delete ui;
 
@@ -364,8 +330,8 @@ void MainWindow::TextChanged(int iUzel, QString objectName, QString newText)
     ui->listWidget->item(iUzel)->setText(ss->hashCommonNodes[objectName]->FormattedNodeString());
 
     logger->AddLog("Network: " + ss->hashCommonNodes[objectName]->m_nameObject+":" + ss->hashCommonNodes[objectName]->m_IP_addr+":" +
-                QString::number(ss->hashCommonNodes[objectName]->m_port)+
-                "(" + ss->hashCommonNodes[objectName]->m_typeObject  + ") === " + ss->hashCommonNodes[objectName]->m_text_client,Qt::darkGreen);
+                   QString::number(ss->hashCommonNodes[objectName]->m_port)+
+                   "(" + ss->hashCommonNodes[objectName]->m_typeObject  + ") === " + ss->hashCommonNodes[objectName]->m_text_client,Qt::darkGreen);
 
 }
 //========================================================================================
@@ -392,11 +358,11 @@ void MainWindow::TextSave2LogFile(int iUzel, QString objectName, QString newText
 
         if (netlog.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
         {
-             QString tmp;
-             tmp.sprintf("%s --- %s\n",QDateTime::currentDateTime().toString("hh:mm:ss.zzz").toStdString().c_str(),
-                         newText.toStdString().c_str());
-             netlog.write( tmp.toStdString().c_str());
-             netlog.close();
+            QString tmp;
+            tmp.sprintf("%s --- %s\n",QDateTime::currentDateTime().toString("hh:mm:ss.zzz").toStdString().c_str(),
+                        newText.toStdString().c_str());
+            netlog.write( tmp.toStdString().c_str());
+            netlog.close();
         }
     }
     else              //node event
@@ -406,16 +372,16 @@ void MainWindow::TextSave2LogFile(int iUzel, QString objectName, QString newText
 
         QFile netlog(filename);
 
-            if (netlog.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
-            {
-                QString tmp;
-                tmp.sprintf("%s --- %s(%s) %s\n",QDateTime::currentDateTime().toString("hh:mm:ss.zzz").toStdString().c_str(),
-                             ss->hashCommonNodes[objectName]->m_nameObject.toStdString().c_str(),
-                             ss->hashCommonNodes[objectName]->m_IP_addr.toStdString().c_str(),
-                             newText.toStdString().c_str());
-                netlog.write( tmp.toStdString().c_str());
-                netlog.close();
-            }
+        if (netlog.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text))
+        {
+            QString tmp;
+            tmp.sprintf("%s --- %s(%s) %s\n",QDateTime::currentDateTime().toString("hh:mm:ss.zzz").toStdString().c_str(),
+                        ss->hashCommonNodes[objectName]->m_nameObject.toStdString().c_str(),
+                        ss->hashCommonNodes[objectName]->m_IP_addr.toStdString().c_str(),
+                        newText.toStdString().c_str());
+            netlog.write( tmp.toStdString().c_str());
+            netlog.close();
+        }
     }
 }
 
@@ -452,36 +418,36 @@ bool MainWindow::CheckHash()
 {
 
 
-QString calculated_hash_result;
-QString file_hash_result;
+    QString calculated_hash_result;
+    QString file_hash_result;
 
     //test - found network interfaces
     QList<QNetworkInterface> ni_list=QNetworkInterface::allInterfaces();
     foreach(QNetworkInterface ni, ni_list)
     {
-    //    logger->AddLog("Interface MAC: "+ni.hardwareAddress(),Qt::black);
-    //    logger->AddLog("Interface name: "+ni.humanReadableName(),Qt::black);
+        //    logger->AddLog("Interface MAC: "+ni.hardwareAddress(),Qt::black);
+        //    logger->AddLog("Interface name: "+ni.humanReadableName(),Qt::black);
 
         QList<QNetworkAddressEntry> nae_list=ni.addressEntries();
         foreach(QNetworkAddressEntry nae,nae_list)
         {
-             //logger->AddLog("Interface  IP: "+nae.ip().toString(),Qt::black);
+            //logger->AddLog("Interface  IP: "+nae.ip().toString(),Qt::black);
 
-             if (nae.ip().toString().left(4)=="172.")
-             {
-                 QByteArray ba((nae.ip().toString()+ " " + ni.hardwareAddress()).toStdString().c_str());//,ni.hardwareAddress().toStdString().length());
-                 QByteArray hash_result=QCryptographicHash::hash(ba,QCryptographicHash::Sha1);
+            if (nae.ip().toString().left(4)=="172.")
+            {
+                QByteArray ba((nae.ip().toString()+ " " + ni.hardwareAddress()).toStdString().c_str());//,ni.hardwareAddress().toStdString().length());
+                QByteArray hash_result=QCryptographicHash::hash(ba,QCryptographicHash::Sha1);
 
-                 calculated_hash_result=hash_result.toHex();
+                calculated_hash_result=hash_result.toHex();
 
 
-       //          logger->AddLog(QString("Interface  IP+MAC: ")+(nae.ip().toString()+ " " + ni.hardwareAddress()).toStdString().c_str(),Qt::black);
-       //          logger->AddLog("Interface  MAC+IP hash: "+calculated_hash_result,Qt::black);
-             }
+                //          logger->AddLog(QString("Interface  IP+MAC: ")+(nae.ip().toString()+ " " + ni.hardwareAddress()).toStdString().c_str(),Qt::black);
+                //          logger->AddLog("Interface  MAC+IP hash: "+calculated_hash_result,Qt::black);
+            }
         }
 
 
-      //  logger->AddLog("----------------- ",Qt::black);
+        //  logger->AddLog("----------------- ",Qt::black);
 
     }
 

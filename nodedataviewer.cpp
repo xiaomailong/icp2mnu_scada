@@ -20,7 +20,7 @@ NodeDataViewer::NodeDataViewer(CommonNode *node, QVector<CommonTrend *> *vectTre
         }
     }
 
-    for(uint i=0;i<m_node->m_srv.num_float_tags;++i)
+    for(uint i=0; i<m_node->m_srv.num_float_tags; ++i)
     {
         if (hashTagNames.contains(i))
             ui->listWidget->addItem(FormattedTagString(m_node->m_nameObject, i, m_node->m_srv.buff[i], hashTagNames[i]));
@@ -40,7 +40,7 @@ QString NodeDataViewer::FormattedTagString(QString objName, uint numInBuff, floa
 {
 
     char tag_text[64];
-    for (uint i=0;i<64;++i) tag_text[i]=' ';
+    for (uint i=0; i<64; ++i) tag_text[i]=' ';
     tag_text[63]=0;
 
     //Небезопасно - по хорошему переделать на strncpy, а лучше на strlcpy, но его нет в mingw
@@ -58,7 +58,7 @@ QString NodeDataViewer::FormattedTagString(QString objName, uint numInBuff, floa
 //=====================================================
 void NodeDataViewer::Timer1sEvent()
 {
-    for(uint i=0;i<m_node->m_srv.num_float_tags;++i)
+    for(uint i=0; i<m_node->m_srv.num_float_tags; ++i)
     {
         if (hashTagNames.contains(i))
             ui->listWidget->item(i)->setText(FormattedTagString(m_node->m_nameObject, i, m_node->m_srv.buff[i], hashTagNames[i]));

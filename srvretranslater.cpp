@@ -19,7 +19,6 @@ void SrvReTranslater::NewConnection()
     pClient->write((char *)buff,num_float_tags*4);
     m_pClientSocketList.push_back(pClient);
 
-    // Qt 5 connect syntax
     connect(pClient, SIGNAL(disconnected()), this, SLOT(ClientDisconnected()));
     //lastClient=pClient;
 }

@@ -19,8 +19,8 @@ public:
     void SeekStartConfig();
     void CloseConfig();
     bool ReadNextNode(QString &objectName, QString &objectType, QString &IP_addr,
-                             uint &port, uint &port_repl, uint &port_local,
-                             uint &modbus_start_address, uint &num_float_tags);
+                      uint &port, uint &port_repl, uint &port_local,
+                      uint &modbus_start_address, uint &num_float_tags);
 
     bool ReadNextTrend(QString &objectName, QString &trendName,uint &numInBuff);
     bool ReadNextAlarm(QString &alarmType, QString &alarmExpression, QVector<alarm_expr_member_struct> &alarmVectExprMembers,

@@ -28,16 +28,16 @@ void LoggerWindow::AddMessage(QString what,QColor color)
     QDateTime dt;
     dt=QDateTime::currentDateTime();
     strDateTime.sprintf("%.2u.%.2u.%.4u %.2u:%.2u:%.2u.%.3u",
-                dt.date().day(),dt.date().month(),dt.date().year(),
-                dt.time().hour(),dt.time().minute(),dt.time().second(),dt.time().msec());
+                        dt.date().day(),dt.date().month(),dt.date().year(),
+                        dt.time().hour(),dt.time().minute(),dt.time().second(),dt.time().msec());
 
     ui->listWidget->addItem(strDateTime+"  "+what);
     if (ui->listWidget->count() > max_messages_count_in_window)
     {
         ui->listWidget->removeItemWidget(ui->listWidget->takeItem(0));
     }
-ui->listWidget->scrollToBottom();
-ui->listWidget->item(ui->listWidget->count()-1)->setForeground(color);
+    ui->listWidget->scrollToBottom();
+    ui->listWidget->item(ui->listWidget->count()-1)->setForeground(color);
 
 }
 //=====================================================================
@@ -61,17 +61,17 @@ Logger* Logger::Instance()
 //=====================================================================
 LoggerWindow* Logger::InstanceWindow()
 {
-     mutex.lock();
+    mutex.lock();
 
-     if(theSingleInstanceLoggerWindow==NULL)
-     {
+    if(theSingleInstanceLoggerWindow==NULL)
+    {
         theSingleInstanceLoggerWindow=new LoggerWindow;
         connect(theSingleInstanceLogger,SIGNAL(signalAddMessage(QString,QColor)),theSingleInstanceLoggerWindow,SLOT(AddMessage(QString,QColor)));
-     }
+    }
 
-     mutex.unlock();
+    mutex.unlock();
 
-     return theSingleInstanceLoggerWindow;
+    return theSingleInstanceLoggerWindow;
 }
 //=====================================================================
 void Logger::AddLog(QString what, QColor color)

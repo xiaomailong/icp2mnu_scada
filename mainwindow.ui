@@ -244,7 +244,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPushButton" name="button_Confirm5Alarms">
+       <widget class="QPushButton" name="button_AcknowledgeLastAlarm">
         <property name="font">
          <font>
           <pointsize>14</pointsize>
@@ -253,7 +253,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Last Alarm Confirm</string>
+         <string>Last Alarm Ack</string>
         </property>
         <property name="icon">
          <iconset resource="res.qrc">

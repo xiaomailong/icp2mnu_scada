@@ -18,7 +18,7 @@ public:
 //=====================================================================
 class FloatTag : public QObject, public Tag
 {
-  Q_OBJECT
+    Q_OBJECT
 private:
     float value;
     bool quality;
