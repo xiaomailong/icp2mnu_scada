@@ -316,7 +316,15 @@ MainWindow::~MainWindow()
 
     emit textSave2LogFile(-1, "","ScadaServer stopped");
 
+    QMessageBox wait_msg;
+    wait_msg.setText("waiting...");
+    wait_msg.setModal(false);
+
+    wait_msg.open(this,NULL);
+
     ss->StopServer();
+
+    wait_msg.close();
 
     delete ui;
 
@@ -463,8 +471,6 @@ bool MainWindow::CheckHash()
     //end test code
 
     if (calculated_hash_result==file_hash_result) return true;
-
-
 
     return false;
 }

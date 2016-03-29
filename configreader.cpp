@@ -143,7 +143,7 @@ bool ConfigReader::ReadNextTrend(QString &objectName, QString &trendName,uint &n
 
         if (node_conf_line[0]=='[') return false;   //достигнута следующая секция
 
-        QRegExp regExp("^(\\w+)\\s+(\\w+)\\s+(\\d+)");  //   \\s?\\n?$");
+        QRegExp regExp("^(\\w+)\\s+(\\w+)\\s+(\\d+)");  //   \\s*\\(.*)$"); - to add trend description to the end of line
         if(regExp.indexIn(node_conf_line)!=-1)  //неподходящие строки игнорируем и выводим в лог
         {
             //for(int i=1;i<9;++i)

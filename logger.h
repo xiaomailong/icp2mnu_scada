@@ -35,8 +35,8 @@ private:
 /*
 struct Message
 {
-QString what;
-QColor color;
+    QString what;
+    QColor color;
 };
 */
 //=============================================================
@@ -51,11 +51,10 @@ private:
     static LoggerWindow *theSingleInstanceLoggerWindow;
 //    static list<Message> messageList;
     static QMutex mutex;
+
 public:
     static Logger* Instance();
-
     static LoggerWindow* InstanceWindow();
-
     void AddLog(QString what, QColor color);
 
 signals:

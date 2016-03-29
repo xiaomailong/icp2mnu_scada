@@ -190,7 +190,7 @@ void ModbusNode::run()
         }
 
 
-        for(int i=0; i<22; ++i) //4.4 sec delay
+        for(int i=0; i<50; ++i) //было 22 - 4.4 sec delay, стало 10 с
         {
             if (CheckThreadStop()) return;
             Sleep(200);
@@ -529,8 +529,8 @@ void MnuScadaNode::run()
 
                     int iDataPosition_end=(now_time.time().hour()*60*60+now_time.time().minute()*60+now_time.time().second())/5;
 
-                    //interval of trend replication - 4 weeks
-                    MinusInterval(iYear_st,iMonth_st,iDay_st,iHour_st,iMinute_st,iSecond_st,86400*7*4);
+                    //interval of trend replication - 2 weeks
+                    MinusInterval(iYear_st,iMonth_st,iDay_st,iHour_st,iMinute_st,iSecond_st,86400*7*2);
 
                     for(; !(iYear_st==iYear_end && iMonth_st==iMonth_end && iDay_st==iDay_end);
                             PlusOneDay(iYear_st,iMonth_st,iDay_st))
@@ -541,6 +541,7 @@ void MnuScadaNode::run()
                                          trend->m_trendName.toStdString().c_str(),iDay_st,iMonth_st,iYear_st);
 
                         QFile trend_file(filename);
+
 
                         if (!trend_file.exists())
                         {
@@ -632,6 +633,7 @@ void MnuScadaNode::run()
                                         }
                                     }
                                 }
+                                msleep(250); // delay for decrease CPU usage
                             }
                         }
                         trend_file.close();
@@ -640,6 +642,7 @@ void MnuScadaNode::run()
                             qDebug() << m_nameObject << " thread repl stop2";
                             return;
                         }
+                        msleep(100); //delay before next file open -> for decrease CPU usage
                     }
                 }
                 repl_socket.close();
@@ -693,7 +696,7 @@ VirtualNode::VirtualNode(int this_number,QString objectName,QString objectType,
 //=========================================================================================
 VirtualNode::~VirtualNode()
 {
-    timerCalculateVariables.stop();  //- error QObject::killTimers: timers cannot be stopped from another thread
+    timerCalculateVariables.stop();
 }
 //=========================================================================================
 void VirtualNode::TimerCalculateVariablesEvent()
@@ -706,7 +709,7 @@ void VirtualNode::TimerCalculateVariablesEvent()
     {
         foreach(virt_expr_member_struct exprMember, virtTag.vectVirtTagExprMembers)
         {
-            if (exprMember.objectName!=m_nameObject) // ход конем чтоб можно было использовать свои же тэги, в противном случае он будет ждать себя же
+            if (exprMember.objectName!=m_nameObject) // чтоб можно было использовать свои же тэги, в противном случае он будет ждать себя же
             {
                 if (!ss->hashCommonNodes[exprMember.objectName]->m_isReaded) allControllersConnected=false;
             }
