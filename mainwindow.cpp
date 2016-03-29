@@ -317,10 +317,12 @@ MainWindow::~MainWindow()
     emit textSave2LogFile(-1, "","ScadaServer stopped");
 
     QMessageBox wait_msg;
-    wait_msg.setText("waiting...");
+    wait_msg.setStandardButtons(QMessageBox::NoButton);
+    wait_msg.setText("waiting for release of resources and close connections...");
     wait_msg.setModal(false);
 
     wait_msg.open(this,NULL);
+    QApplication::processEvents();
 
     ss->StopServer();
 
